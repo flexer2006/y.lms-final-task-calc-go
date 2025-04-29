@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="a5b8ddde-096e-4caa-b55f-74ffbc347516" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.golang-ci.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/y.lms-final-task-calc-go.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Taskfile.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/containers/docker/auth.Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/containers/docker/gateway.Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/containers/docker/nginx.Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/containers/docker/owner.Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/containers/docker/postgres.Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/containers/docker/redis.Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cmd/auth/main.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cmd/gateway/main.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cmd/owner/main.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deploy/docker-compose.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deploy/nginx/nginx.conf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/google/api/annotations.proto" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/google/api/http.proto" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/google/protobuf/descriptor.proto" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/google/protobuf/empty.proto" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/google/protobuf/timestamp.proto" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/domain/entities/user.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/domain/errors/errors.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/domain/services/auth.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/domain/services/jwt.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/domain/services/password.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pkg/db/postgres/migrate.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pkg/db/postgres/postgres.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pkg/db/postgres/postgres_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pkg/logger/context.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pkg/logger/logger.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pkg/logger/logger_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pkg/logger/request_id.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pkg/shutdown/shutdown.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pkg/shutdown/shutdown_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/revive.toml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/gen.sh" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Go File" />
+      </list>
+    </option>
+  </component>
+  <component name="GOROOT" url="file://$USER_HOME$/go" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;flexer2006&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/flexer2006/y.lms-final-task-calc-go.git&quot;,
+    &quot;accountId&quot;: &quot;c0eafd84-7bec-4698-8808-9277363365fe&quot;
+  }
+}</component>
+  <component name="GoLibraries">
+    <option name="indexEntireGoPath" value="true" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
+  <component name="ProjectId" id="2wLSIqLKc9pawQqo3Zr1ZNT0E0i" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
+    &quot;Go Test.go test y.lms-final-task-calc-go/pkg/shutdown.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.GoLinterPluginOnboarding&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.GoLinterPluginStorageMigration&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/andrewgo&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;go.sdk&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/internal/domain/" />
+      <recent name="$PROJECT_DIR$/internal/domain/auth/entities" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="go test y.lms-final-task-calc-go/pkg/shutdown" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="y.lms-final-task-calc-go" />
+      <working_directory value="$PROJECT_DIR$/pkg/shutdown" />
+      <kind value="PACKAGE" />
+      <package value="y.lms-final-task-calc-go/pkg/shutdown" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Go Test.go test y.lms-final-task-calc-go/pkg/shutdown" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-gosdk-3b128438d3f6-34ac7aa8f6ab-org.jetbrains.plugins.go.sharedIndexes.bundled-GO-251.23774.430" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a5b8ddde-096e-4caa-b55f-74ffbc347516" name="Changes" comment="" />
+      <created>1745819283670</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1745819283670</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="VgoProject">
+    <integration-enabled>false</integration-enabled>
+    <settings-migrated>true</settings-migrated>
+  </component>
+</project>
