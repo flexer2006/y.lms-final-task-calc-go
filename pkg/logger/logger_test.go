@@ -177,7 +177,7 @@ func TestWithMethod(t *testing.T) {
 	zapLogger := logger.New(core)
 
 	withLogger := zapLogger.With(zap.String("common_key", "common_value"))
-	require.NotNil(t, withLogger, "With should return a non-nil logger")
+	require.NotNil(t, withLogger, "with should return a non-nil logger")
 
 	withLogger.Info("test message", zap.String("specific_key", "specific_value"))
 
