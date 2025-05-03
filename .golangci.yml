@@ -1,0 +1,33 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - bodyclose
+    - sqlclosecheck
+    - errorlint
+    - gosec
+    - wrapcheck
+    - noctx
+    - err113
+    - misspell
+    - whitespace
+    - gocritic
+    - wastedassign
+    - dupl
+    - nestif
+    - godot
+    - testifylint
+    - thelper
+    - contextcheck
+    - bidichk
+    - canonicalheader
+
