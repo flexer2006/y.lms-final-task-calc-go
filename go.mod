@@ -3,6 +3,7 @@ module github.com/flexer2006/y.lms-final-task-calc-go
 go 1.24.2
 
 require (
+	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.8.1
 	go.uber.org/zap v1.27.0
 )
