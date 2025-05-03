@@ -8,19 +8,32 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	"github.com/flexer2006/y.lms-final-task-calc-go/pkg/logger/logging"
 	"github.com/flexer2006/y.lms-final-task-calc-go/pkg/logger/logging/core"
 	"github.com/flexer2006/y.lms-final-task-calc-go/pkg/logger/logging/level"
 )
 
+// Logger представляет журнал.
+type Logger struct {
+	zapLogger *zap.Logger
+	level     zap.AtomicLevel
+}
+
 // Константы для ошибок создания журналов.
 const (
-	errBuildDevLogger  = "failed to build development logger"
-	errBuildProdLogger = "failed to build production logger"
+	ErrBuildDevLogger  = "failed to build development logger"
+	ErrBuildProdLogger = "failed to build production logger"
 )
 
+// NewLogger создает новый журнал с заданным zap Logger и уровнем.
+func NewLogger(zapLogger *zap.Logger, level zap.AtomicLevel) *Logger {
+	return &Logger{
+		zapLogger: zapLogger,
+		level:     level,
+	}
+}
+
 // New создает новый журнал с указанными настройками ядра.
-func New(core zapcore.Core) *logging.Logger {
+func New(core zapcore.Core) *Logger {
 	zapLogger := zap.New(
 		core,
 		zap.AddCaller(),
@@ -34,11 +47,11 @@ func New(core zapcore.Core) *logging.Logger {
 		atomicLevel = zap.NewAtomicLevelAt(zapcore.InfoLevel)
 	}
 
-	return logging.NewLogger(zapLogger, atomicLevel)
+	return NewLogger(zapLogger, atomicLevel)
 }
 
 // Console создает журнал с выводом в консоль.
-func Console(lvl level.LogLevel, json bool) *logging.Logger {
+func Console(lvl level.LogLevel, json bool) *Logger {
 	encoder := core.CreateEncoder(json)
 	atomicLevel := zap.NewAtomicLevelAt(lvl.ToZapLevel())
 
@@ -50,27 +63,37 @@ func Console(lvl level.LogLevel, json bool) *logging.Logger {
 
 	zapLogger := zap.New(zapCore, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
 
-	return logging.NewLogger(zapLogger, atomicLevel)
+	return NewLogger(zapLogger, atomicLevel)
 }
 
 // Development создает журнал для разработки.
-func Development() (*logging.Logger, error) {
+func Development() (*Logger, error) {
 	cfg := zap.NewDevelopmentConfig()
 	zapLogger, err := cfg.Build()
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", errBuildDevLogger, err)
+		return nil, fmt.Errorf("%s: %w", ErrBuildDevLogger, err)
 	}
 
-	return logging.NewLogger(zapLogger, zap.NewAtomicLevelAt(zapcore.DebugLevel)), nil
+	return NewLogger(zapLogger, zap.NewAtomicLevelAt(zapcore.DebugLevel)), nil
 }
 
 // Production создает журнал для релиза продукта.
-func Production() (*logging.Logger, error) {
+func Production() (*Logger, error) {
 	cfg := zap.NewProductionConfig()
 	zapLogger, err := cfg.Build()
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", errBuildProdLogger, err)
+		return nil, fmt.Errorf("%s: %w", ErrBuildProdLogger, err)
 	}
 
-	return logging.NewLogger(zapLogger, zap.NewAtomicLevelAt(zapcore.InfoLevel)), nil
+	return NewLogger(zapLogger, zap.NewAtomicLevelAt(zapcore.InfoLevel)), nil
+}
+
+// GetZapLogger возвращает нижележащий zap logger.
+func (l *Logger) GetZapLogger() *zap.Logger {
+	return l.zapLogger
+}
+
+// GetAtomicLevel возвращает атомарный уровень логирования.
+func (l *Logger) GetAtomicLevel() zap.AtomicLevel {
+	return l.level
 }
