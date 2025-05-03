@@ -1,0 +1,18 @@
+version: '3'
+
+tasks:
+  default:
+    desc: "Run linter and tests"
+    cmds:
+      - task: lint
+      - task: test
+
+  lint:
+    desc: "Run linter"
+    cmds:
+      - golangci-lint run ./...
+
+  test:
+    desc: "Run tests with coverage"
+    cmds:
+      - go test -cover -coverprofile=coverage.out ./...
