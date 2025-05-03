@@ -7,12 +7,13 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
+	"github.com/flexer2006/y.lms-final-task-calc-go/pkg/logger/logging/factory"
 	"github.com/flexer2006/y.lms-final-task-calc-go/pkg/logger/logging/level"
 )
 
-// Константы для сообщений об ошибках.
+// ErrSyncLogger Константа для сообщения об ошибке.
 const (
-	errSyncLogger = "failed to sync logger"
+	ErrSyncLogger = "failed to sync logger"
 )
 
 // LoggerInterface определяет интерфейс для журнала.
@@ -28,21 +29,55 @@ type LoggerInterface interface {
 	Sync() error
 }
 
-// Убедимся, что Logger реализует LoggerInterface.
-var _ LoggerInterface = (*Logger)(nil)
-
 // Logger предоставляет интерфейс для логирования.
 type Logger struct {
 	zapLogger *zap.Logger
 	level     zap.AtomicLevel
 }
 
-// NewLogger создает новый журнал с заданным zap Logger и уровнем.
-func NewLogger(zapLogger *zap.Logger, level zap.AtomicLevel) *Logger {
+// Убедимся, что Logger реализует LoggerInterface.
+var _ LoggerInterface = (*Logger)(nil)
+
+// New создает новый журнал с указанными настройками ядра.
+func New(core zapcore.Core) *Logger {
+	factoryLogger := factory.New(core)
 	return &Logger{
-		zapLogger: zapLogger,
-		level:     level,
+		zapLogger: factoryLogger.GetZapLogger(),
+		level:     factoryLogger.GetAtomicLevel(),
 	}
+}
+
+// Console создает журнал с выводом в консоль.
+func Console(lvl level.LogLevel, json bool) *Logger {
+	factoryLogger := factory.Console(lvl, json)
+	return &Logger{
+		zapLogger: factoryLogger.GetZapLogger(),
+		level:     factoryLogger.GetAtomicLevel(),
+	}
+}
+
+// Development создает журнал для разработки.
+func Development() (*Logger, error) {
+	factoryLogger, err := factory.Development()
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", factory.ErrBuildDevLogger, err)
+	}
+	return &Logger{
+		zapLogger: factoryLogger.GetZapLogger(),
+		level:     factoryLogger.GetAtomicLevel(),
+	}, nil
+}
+
+// Production создает журнал для релиза продукта.
+func Production() (*Logger, error) {
+	factoryLogger, err := factory.Production()
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", factory.ErrBuildProdLogger, err)
+	}
+	return &Logger{
+		zapLogger: factoryLogger.GetZapLogger(),
+		level:     factoryLogger.GetAtomicLevel(),
+	}, nil
 }
 
 // With создаёт новый журнал с дополнительными полями.
@@ -117,7 +152,7 @@ func (l *Logger) Sync() error {
 	}
 
 	if err := l.zapLogger.Sync(); err != nil {
-		return fmt.Errorf("%s: %w", errSyncLogger, err)
+		return fmt.Errorf("%s: %w", ErrSyncLogger, err)
 	}
 
 	return nil

@@ -1,6 +1,7 @@
 package factory_test
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/flexer2006/y.lms-final-task-calc-go/pkg/logger/logging/factory"
@@ -9,201 +10,214 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"go.uber.org/zap/zaptest/observer"
 )
 
-type mockCore struct {
-	level      zapcore.Level
-	hasLevel   bool
-	enabledFor zapcore.Level
-	fields     []zapcore.Field
+type MockCore struct {
+	level zapcore.Level
 }
 
-func (m *mockCore) Enabled(lvl zapcore.Level) bool {
-	return lvl >= m.enabledFor
+func (m MockCore) Enabled(lvl zapcore.Level) bool {
+	return lvl >= m.level
 }
 
-func (m *mockCore) With(fields []zapcore.Field) zapcore.Core {
-	m.fields = append(m.fields, fields...)
+func (m MockCore) With(fields []zapcore.Field) zapcore.Core {
 	return m
 }
 
-func (m *mockCore) Check(ent zapcore.Entry, ce *zapcore.CheckedEntry) *zapcore.CheckedEntry {
+func (m MockCore) Check(ent zapcore.Entry, ce *zapcore.CheckedEntry) *zapcore.CheckedEntry {
 	if m.Enabled(ent.Level) {
 		return ce.AddCore(ent, m)
 	}
 	return ce
 }
 
-func (m *mockCore) Write(_ zapcore.Entry, fields []zapcore.Field) error {
-	m.fields = append(m.fields, fields...)
+func (m MockCore) Write(ent zapcore.Entry, fields []zapcore.Field) error {
 	return nil
 }
 
-func (m *mockCore) Sync() error {
+func (m MockCore) Sync() error {
 	return nil
 }
 
-func (m *mockCore) Level() zapcore.Level {
-	if !m.hasLevel {
-		return m.enabledFor
-	}
+func (m MockCore) Level() zapcore.Level {
 	return m.level
 }
 
-type basicCore struct{}
+func TestNewLogger(t *testing.T) {
+	zapLogger := zap.NewExample()
+	atomicLevel := zap.NewAtomicLevelAt(zapcore.InfoLevel)
 
-func (b *basicCore) Enabled(_ zapcore.Level) bool        { return true }
-func (b *basicCore) With(_ []zapcore.Field) zapcore.Core { return b }
-func (b *basicCore) Check(ent zapcore.Entry, ce *zapcore.CheckedEntry) *zapcore.CheckedEntry {
-	return ce.AddCore(ent, b)
+	logger := factory.NewLogger(zapLogger, atomicLevel)
+
+	assert.Equal(t, zapLogger, logger.GetZapLogger(), "GetZapLogger should return the provided zap logger")
+
+	assert.Equal(t, atomicLevel, logger.GetAtomicLevel(), "GetAtomicLevel should return the provided atomic level")
 }
-func (b *basicCore) Write(_ zapcore.Entry, _ []zapcore.Field) error { return nil }
-func (b *basicCore) Sync() error                                    { return nil }
 
 func TestNew(t *testing.T) {
-	testCases := []struct {
-		name           string
-		core           zapcore.Core
-		expectedLevel  level.LogLevel
-		coreHasLevel   bool
-		coreLevel      zapcore.Level
-		coreEnabledFor zapcore.Level
+	tests := []struct {
+		name          string
+		coreLevel     zapcore.Level
+		expectedLevel zapcore.Level
+		hasLevelFunc  bool
 	}{
 		{
-			name:          "creates logger with core that has no Level method",
-			core:          &basicCore{},
-			expectedLevel: level.InfoLevel,
-			coreHasLevel:  false,
+			name:          "core with level method",
+			coreLevel:     zapcore.DebugLevel,
+			expectedLevel: zapcore.DebugLevel,
+			hasLevelFunc:  true,
 		},
 		{
-			name:           "extracts level from core with Level method",
-			coreHasLevel:   true,
-			coreLevel:      zapcore.DebugLevel,
-			coreEnabledFor: zapcore.DebugLevel,
-			expectedLevel:  level.DebugLevel,
-		},
-		{
-			name:           "uses enabledFor as level when hasLevel is false",
-			coreHasLevel:   false,
-			coreEnabledFor: zapcore.InfoLevel,
-			expectedLevel:  level.InfoLevel,
+			name:          "core without level method",
+			coreLevel:     zapcore.WarnLevel,
+			expectedLevel: zapcore.InfoLevel,
+			hasLevelFunc:  false,
 		},
 	}
 
-	for _, tc := range testCases {
+	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			var core zapcore.Core
-
-			if tc.core != nil {
-				core = tc.core
+			if tc.hasLevelFunc {
+				core = MockCore{level: tc.coreLevel}
 			} else {
-				core = &mockCore{
-					level:      tc.coreLevel,
-					hasLevel:   tc.coreHasLevel,
-					enabledFor: tc.coreEnabledFor,
-				}
+				core = noLevelMethodCore{}
 			}
 
 			logger := factory.New(core)
+			require.NotNil(t, logger, "New should return a non-nil logger")
 
-			require.NotNil(t, logger, "logger should not be nil")
-			assert.Equal(t, tc.expectedLevel, logger.GetLevel(), "logger should have expected level")
+			assert.Equal(t, tc.expectedLevel, logger.GetAtomicLevel().Level(),
+				"New should set the atomic level based on core's Level method if available, otherwise default to Info")
+
+			assert.NotNil(t, logger.GetZapLogger(), "New should create a non-nil zap logger")
 		})
 	}
 }
 
+type noLevelMethodCore struct{}
+
+func (n noLevelMethodCore) Enabled(level zapcore.Level) bool         { return true }
+func (n noLevelMethodCore) With(fields []zapcore.Field) zapcore.Core { return n }
+func (n noLevelMethodCore) Check(ent zapcore.Entry, ce *zapcore.CheckedEntry) *zapcore.CheckedEntry {
+	return ce.AddCore(ent, n)
+}
+func (n noLevelMethodCore) Write(ent zapcore.Entry, fields []zapcore.Field) error { return nil }
+func (n noLevelMethodCore) Sync() error                                           { return nil }
+
 func TestConsole(t *testing.T) {
-	testCases := []struct {
-		name     string
-		logLevel level.LogLevel
-		json     bool
+	tests := []struct {
+		name        string
+		lvl         level.LogLevel
+		json        bool
+		expectedLvl zapcore.Level
 	}{
-		{name: "console logger with debug level", logLevel: level.DebugLevel, json: false},
-		{name: "JSON logger with info level", logLevel: level.InfoLevel, json: true},
-		{name: "console logger with warn level", logLevel: level.WarnLevel, json: false},
-		{name: "JSON logger with error level", logLevel: level.ErrorLevel, json: true},
-		{name: "console logger with fatal level", logLevel: level.FatalLevel, json: false},
+		{
+			name:        "debug level with console encoder",
+			lvl:         level.DebugLevel,
+			json:        false,
+			expectedLvl: zapcore.DebugLevel,
+		},
+		{
+			name:        "info level with json encoder",
+			lvl:         level.InfoLevel,
+			json:        true,
+			expectedLvl: zapcore.InfoLevel,
+		},
+		{
+			name:        "warn level with console encoder",
+			lvl:         level.WarnLevel,
+			json:        false,
+			expectedLvl: zapcore.WarnLevel,
+		},
+		{
+			name:        "error level with json encoder",
+			lvl:         level.ErrorLevel,
+			json:        true,
+			expectedLvl: zapcore.ErrorLevel,
+		},
+		{
+			name:        "fatal level with console encoder",
+			lvl:         level.FatalLevel,
+			json:        false,
+			expectedLvl: zapcore.FatalLevel,
+		},
+		{
+			name:        "unknown level defaults to info",
+			lvl:         level.LogLevel(99),
+			json:        true,
+			expectedLvl: zapcore.InfoLevel,
+		},
 	}
 
-	for _, tc := range testCases {
+	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			logger := factory.Console(tc.logLevel, tc.json)
+			logger := factory.Console(tc.lvl, tc.json)
+			require.NotNil(t, logger, "Console should return a non-nil logger")
 
-			require.NotNil(t, logger, "logger should not be nil")
-			assert.Equal(t, tc.logLevel, logger.GetLevel(), "logger should have expected level")
+			assert.Equal(t, tc.expectedLvl, logger.GetAtomicLevel().Level(),
+				"Console should set the atomic level based on the provided level")
 
-			logger.Info("test message")
-			_ = logger.Sync()
+			assert.NotNil(t, logger.GetZapLogger(), "Console should create a non-nil zap logger")
 		})
 	}
 }
 
 func TestDevelopment(t *testing.T) {
 	logger, err := factory.Development()
+	require.NoError(t, err, "Development should not return an error")
+	require.NotNil(t, logger, "Development should return a non-nil logger")
 
-	require.NoError(t, err, "development logger creation should not error")
-	require.NotNil(t, logger, "logger should not be nil")
-	assert.Equal(t, level.DebugLevel, logger.GetLevel(), "development logger should have debug level")
+	assert.Equal(t, zapcore.DebugLevel, logger.GetAtomicLevel().Level(),
+		"Development should set the level to Debug")
 
-	logger.Debug("debug message")
-	_ = logger.Sync()
+	assert.NotNil(t, logger.GetZapLogger(), "Development should create a non-nil zap logger")
 }
 
 func TestProduction(t *testing.T) {
 	logger, err := factory.Production()
+	require.NoError(t, err, "Production should not return an error")
+	require.NotNil(t, logger, "Production should return a non-nil logger")
 
-	require.NoError(t, err, "production logger creation should not error")
-	require.NotNil(t, logger, "logger should not be nil")
-	assert.Equal(t, level.InfoLevel, logger.GetLevel(), "production logger should have info level")
+	assert.Equal(t, zapcore.InfoLevel, logger.GetAtomicLevel().Level(),
+		"Production should set the level to Info")
 
-	logger.Info("info message")
-	_ = logger.Sync()
+	assert.NotNil(t, logger.GetZapLogger(), "Production should create a non-nil zap logger")
 }
 
-func TestNewWithCustomCore(t *testing.T) {
-	zapLevels := []zapcore.Level{
-		zapcore.DebugLevel,
-		zapcore.InfoLevel,
-		zapcore.WarnLevel,
-		zapcore.ErrorLevel,
-		zapcore.FatalLevel,
-	}
+func TestGetZapLogger(t *testing.T) {
+	zapLogger := zap.NewExample()
+	logger := factory.NewLogger(zapLogger, zap.NewAtomicLevel())
 
-	for _, zapLvl := range zapLevels {
-		t.Run("level "+zapLvl.String(), func(t *testing.T) {
-			encoder := zapcore.NewConsoleEncoder(zap.NewProductionEncoderConfig())
-			writer := zapcore.AddSync(zapcore.NewMultiWriteSyncer())
-			atomicLevel := zap.NewAtomicLevelAt(zapLvl)
-			core := zapcore.NewCore(encoder, writer, atomicLevel)
-
-			logger := factory.New(core)
-
-			require.NotNil(t, logger, "logger should not be nil")
-			expectedLevel := level.FromZapLevel(zapLvl)
-			assert.Equal(t, expectedLevel, logger.GetLevel(),
-				"logger should have level matching the input zap core level")
-		})
-	}
+	assert.Equal(t, zapLogger, logger.GetZapLogger(),
+		"GetZapLogger should return the logger that was provided to NewLogger")
 }
 
-func TestLoggerMethods(t *testing.T) {
-	core, recorded := observer.New(zap.InfoLevel)
-	logger := factory.New(core)
+func TestGetAtomicLevel(t *testing.T) {
+	atomicLevel := zap.NewAtomicLevelAt(zapcore.DebugLevel)
+	logger := factory.NewLogger(zap.NewExample(), atomicLevel)
 
-	logger.Debug("debug message")
-	logger.Info("info message")
-	logger.Warn("warn message")
-	logger.Error("error message")
+	assert.Equal(t, atomicLevel, logger.GetAtomicLevel(),
+		"GetAtomicLevel should return the level that was provided to NewLogger")
+}
 
-	assert.Equal(t, 3, recorded.Len(), "should record exactly 3 messages (info, warn, error)")
+func TestLoggerLogging(t *testing.T) {
+	var buf bytes.Buffer
+	writeSyncer := zapcore.AddSync(&buf)
 
-	entries := recorded.All()
-	assert.Equal(t, "info message", entries[0].Message, "first message should be info")
-	assert.Equal(t, "warn message", entries[1].Message, "second message should be warn")
-	assert.Equal(t, "error message", entries[2].Message, "third message should be error")
+	encoder := zapcore.NewConsoleEncoder(zap.NewProductionEncoderConfig())
 
-	assert.Equal(t, zapcore.InfoLevel, entries[0].Level, "first message should be at info level")
-	assert.Equal(t, zapcore.WarnLevel, entries[1].Level, "second message should be at warn level")
-	assert.Equal(t, zapcore.ErrorLevel, entries[2].Level, "third message should be at error level")
+	zapCore := zapcore.NewCore(
+		encoder,
+		writeSyncer,
+		zap.NewAtomicLevelAt(zapcore.InfoLevel),
+	)
+
+	logger := factory.New(zapCore)
+
+	zapLogger := logger.GetZapLogger()
+	zapLogger.Info("test message")
+
+	logOutput := buf.String()
+	assert.Contains(t, logOutput, "test message", "The logger should write the message to the buffer")
 }
