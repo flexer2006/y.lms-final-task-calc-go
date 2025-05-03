@@ -3,13 +3,14 @@ package logging
 
 import (
 	"fmt"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
 	"github.com/flexer2006/y.lms-final-task-calc-go/pkg/logger/logging/level"
 )
 
-// Константы для сообщений об ошибках
+// Константы для сообщений об ошибках.
 const (
 	errSyncLogger = "failed to sync logger"
 )

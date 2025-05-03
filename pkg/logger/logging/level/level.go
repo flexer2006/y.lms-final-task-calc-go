@@ -18,9 +18,9 @@ const (
 )
 
 const (
-	infoLVL    = "infoLVL"
-	debugLVL   = "debugLVL"
-	warnLVL    = "warnLVL"
+	infoLVL    = "info"
+	debugLVL   = "debug"
+	warnLVL    = "warn"
 	errorLVL   = "error"
 	fatalLVL   = "fatal"
 	unknownLVL = "unknown"
