@@ -8,3 +8,4 @@ vendor/
 go.work
 go.work.sum
 .env
+deploy/nginx/ssl/*.pem
