@@ -22,6 +22,42 @@ services:
     networks:
       - app-network
 
+  auth-db:
+    build:
+      context: ..
+      dockerfile: build/containers/docker/postgres.Dockerfile
+    environment:
+      - POSTGRES_DB=${AUTH_POSTGRES_DB_NAME}
+      - POSTGRES_USER=${AUTH_POSTGRES_DB_USER}
+      - POSTGRES_PASSWORD=${AUTH_POSTGRES_DB_PASSWORD}
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+  orchestrator-db:
+    build:
+      context: ..
+      dockerfile: build/containers/docker/postgres.Dockerfile
+    environment:
+      - POSTGRES_DB=${ORCHESTRATOR_POSTGRES_DB_NAME}
+      - POSTGRES_USER=${ORCHESTRATOR_POSTGRES_DB_USER}
+      - POSTGRES_PASSWORD=${ORCHESTRATOR_POSTGRES_DB_PASSWORD}
+    volumes:
+      - orchestrator-db-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - app-network
+
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  auth-db-data:
+    driver: local
+  orchestrator-db-data:
+    driver: local
