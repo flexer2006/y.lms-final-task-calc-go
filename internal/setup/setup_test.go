@@ -12,6 +12,7 @@ import (
 	"github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/jwt"
 	"github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/logger"
 	"github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/orchestrator"
+	orchagent "github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/orchestrator/agent"
 	orchdb "github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/orchestrator/db"
 	orchpgx "github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/orchestrator/db/pgxx"
 	orchpg "github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/orchestrator/db/postgres"
@@ -206,6 +207,15 @@ func TestOrchestratorConfig(t *testing.T) {
 		Pgx:      orchPgxConfig,
 	}
 
+	// Добавляем конфигурацию агентов
+	orchAgentConfig := orchagent.Config{
+		ComputerPower:       4,
+		TimeAddition:        1 * time.Second,
+		TimeSubtraction:     1 * time.Second,
+		TimeMultiplications: 2 * time.Second,
+		TimeDivisions:       2 * time.Second,
+	}
+
 	orchConfig := setup.OrchestratorConfig{
 		BaseConfig: setup.BaseConfig{
 			Logger: logger.Config{
@@ -228,8 +238,9 @@ func TestOrchestratorConfig(t *testing.T) {
 			},
 		},
 		Orchestrator: orchestrator.Config{
-			Db:   orchDBConfig,
-			Grpc: orchGrpcConfig,
+			Db:    orchDBConfig,
+			Grpc:  orchGrpcConfig,
+			Agent: orchAgentConfig, // Добавляем конфигурацию агентов
 		},
 	}
 
@@ -241,22 +252,27 @@ func TestOrchestratorConfig(t *testing.T) {
 		{
 			name:     "GetLoggerConfig",
 			method:   func() any { return orchConfig.GetLoggerConfig() },
-			expected: orchConfig.Logger, // Исправлено: убрано orchConfig.BaseConfig
+			expected: orchConfig.Logger,
 		},
 		{
 			name:     "GetJWTConfig",
 			method:   func() any { return orchConfig.GetJWTConfig() },
-			expected: orchConfig.JWT, // Исправлено: убрано orchConfig.BaseConfig
+			expected: orchConfig.JWT,
 		},
 		{
 			name:     "GetShutdownConfig",
 			method:   func() any { return orchConfig.GetShutdownConfig() },
-			expected: orchConfig.GracefulShutdown, // Исправлено: убрано orchConfig.BaseConfig
+			expected: orchConfig.GracefulShutdown,
 		},
 		{
 			name:     "GetOrchestratorGRPCConfig",
 			method:   func() any { return orchConfig.GetOrchestratorGRPCConfig() },
 			expected: orchGrpcConfig,
+		},
+		{
+			name:     "GetOrchestratorAgentConfig",
+			method:   func() any { return orchConfig.GetOrchestratorAgentConfig() },
+			expected: orchAgentConfig,
 		},
 		{
 			name:     "GetOrchestratorPostgresConfig",
@@ -288,6 +304,11 @@ func TestOrchestratorConfig(t *testing.T) {
 			method:   func() any { return orchConfig.GetDSN() },
 			expected: "host=orch-postgres-host port=5433 user=orch-postgres-user password=orch-postgres-password dbname=orch-postgres-db sslmode=disable",
 		},
+		{
+			name:     "GetAgentComputerPower",
+			method:   func() any { return orchConfig.GetAgentComputerPower() },
+			expected: 4,
+		},
 	}
 
 	for _, tt := range tests {
@@ -296,6 +317,23 @@ func TestOrchestratorConfig(t *testing.T) {
 			assert.Equal(t, tt.expected, result)
 		})
 	}
+
+	// Отдельный тест для метода GetAgentOperationTimes, так как результат - это map
+	t.Run("GetAgentOperationTimes", func(t *testing.T) {
+		expected := map[string]time.Duration{
+			"addition":       1 * time.Second,
+			"subtraction":    1 * time.Second,
+			"multiplication": 2 * time.Second,
+			"division":       2 * time.Second,
+		}
+		result := orchConfig.GetAgentOperationTimes()
+
+		assert.Equal(t, expected["addition"], result["addition"])
+		assert.Equal(t, expected["subtraction"], result["subtraction"])
+		assert.Equal(t, expected["multiplication"], result["multiplication"])
+		assert.Equal(t, expected["division"], result["division"])
+		assert.Equal(t, len(expected), len(result))
+	})
 }
 
 func TestServerConfig(t *testing.T) {

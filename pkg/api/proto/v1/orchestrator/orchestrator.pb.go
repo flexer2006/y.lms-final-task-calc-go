@@ -10,6 +10,7 @@ import (
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
@@ -22,6 +23,181 @@ const (
 	// Verify that runtime/protoimpl is sufficiently up-to-date.
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
+
+// CalculationStatus определяет статус вычисления.
+type CalculationStatus int32
+
+const (
+	// Вычисление ожидает выполнения.
+	CalculationStatus_PENDING CalculationStatus = 0
+	// Вычисление в процессе выполнения.
+	CalculationStatus_IN_PROGRESS CalculationStatus = 1
+	// Вычисление успешно завершено.
+	CalculationStatus_COMPLETED CalculationStatus = 2
+	// Вычисление завершилось с ошибкой.
+	CalculationStatus_ERROR CalculationStatus = 3
+)
+
+// Enum value maps for CalculationStatus.
+var (
+	CalculationStatus_name = map[int32]string{
+		0: "PENDING",
+		1: "IN_PROGRESS",
+		2: "COMPLETED",
+		3: "ERROR",
+	}
+	CalculationStatus_value = map[string]int32{
+		"PENDING":     0,
+		"IN_PROGRESS": 1,
+		"COMPLETED":   2,
+		"ERROR":       3,
+	}
+)
+
+func (x CalculationStatus) Enum() *CalculationStatus {
+	p := new(CalculationStatus)
+	*p = x
+	return p
+}
+
+func (x CalculationStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (CalculationStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_proto_v1_orchestrator_orchestrator_proto_enumTypes[0].Descriptor()
+}
+
+func (CalculationStatus) Type() protoreflect.EnumType {
+	return &file_proto_v1_orchestrator_orchestrator_proto_enumTypes[0]
+}
+
+func (x CalculationStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use CalculationStatus.Descriptor instead.
+func (CalculationStatus) EnumDescriptor() ([]byte, []int) {
+	return file_proto_v1_orchestrator_orchestrator_proto_rawDescGZIP(), []int{0}
+}
+
+// OperationStatus определяет статус операции.
+type OperationStatus int32
+
+const (
+	// Операция ожидает выполнения.
+	OperationStatus_OPERATION_PENDING OperationStatus = 0
+	// Операция в процессе выполнения.
+	OperationStatus_OPERATION_IN_PROGRESS OperationStatus = 1
+	// Операция успешно завершена.
+	OperationStatus_OPERATION_COMPLETED OperationStatus = 2
+	// Операция завершилась с ошибкой.
+	OperationStatus_OPERATION_ERROR OperationStatus = 3
+)
+
+// Enum value maps for OperationStatus.
+var (
+	OperationStatus_name = map[int32]string{
+		0: "OPERATION_PENDING",
+		1: "OPERATION_IN_PROGRESS",
+		2: "OPERATION_COMPLETED",
+		3: "OPERATION_ERROR",
+	}
+	OperationStatus_value = map[string]int32{
+		"OPERATION_PENDING":     0,
+		"OPERATION_IN_PROGRESS": 1,
+		"OPERATION_COMPLETED":   2,
+		"OPERATION_ERROR":       3,
+	}
+)
+
+func (x OperationStatus) Enum() *OperationStatus {
+	p := new(OperationStatus)
+	*p = x
+	return p
+}
+
+func (x OperationStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (OperationStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_proto_v1_orchestrator_orchestrator_proto_enumTypes[1].Descriptor()
+}
+
+func (OperationStatus) Type() protoreflect.EnumType {
+	return &file_proto_v1_orchestrator_orchestrator_proto_enumTypes[1]
+}
+
+func (x OperationStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use OperationStatus.Descriptor instead.
+func (OperationStatus) EnumDescriptor() ([]byte, []int) {
+	return file_proto_v1_orchestrator_orchestrator_proto_rawDescGZIP(), []int{1}
+}
+
+// OperationType определяет тип арифметической операции.
+type OperationType int32
+
+const (
+	// Неопределенная операция.
+	OperationType_TYPE_UNSPECIFIED OperationType = 0
+	// Сложение.
+	OperationType_TYPE_ADDITION OperationType = 1
+	// Вычитание.
+	OperationType_TYPE_SUBTRACTION OperationType = 2
+	// Умножение.
+	OperationType_TYPE_MULTIPLICATION OperationType = 3
+	// Деление.
+	OperationType_TYPE_DIVISION OperationType = 4
+)
+
+// Enum value maps for OperationType.
+var (
+	OperationType_name = map[int32]string{
+		0: "TYPE_UNSPECIFIED",
+		1: "TYPE_ADDITION",
+		2: "TYPE_SUBTRACTION",
+		3: "TYPE_MULTIPLICATION",
+		4: "TYPE_DIVISION",
+	}
+	OperationType_value = map[string]int32{
+		"TYPE_UNSPECIFIED":    0,
+		"TYPE_ADDITION":       1,
+		"TYPE_SUBTRACTION":    2,
+		"TYPE_MULTIPLICATION": 3,
+		"TYPE_DIVISION":       4,
+	}
+)
+
+func (x OperationType) Enum() *OperationType {
+	p := new(OperationType)
+	*p = x
+	return p
+}
+
+func (x OperationType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (OperationType) Descriptor() protoreflect.EnumDescriptor {
+	return file_proto_v1_orchestrator_orchestrator_proto_enumTypes[2].Descriptor()
+}
+
+func (OperationType) Type() protoreflect.EnumType {
+	return &file_proto_v1_orchestrator_orchestrator_proto_enumTypes[2]
+}
+
+func (x OperationType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use OperationType.Descriptor instead.
+func (OperationType) EnumDescriptor() ([]byte, []int) {
+	return file_proto_v1_orchestrator_orchestrator_proto_rawDescGZIP(), []int{2}
+}
 
 // Запрос на вычисление выражения.
 type CalculateRequest struct {
@@ -75,7 +251,7 @@ type CalculateResponse struct {
 	// Уникальный идентификатор для отслеживания вычисления.
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// Текущий статус вычисления.
-	Status int32 `protobuf:"varint,2,opt,name=status,proto3" json:"status,omitempty"`
+	Status CalculationStatus `protobuf:"varint,2,opt,name=status,proto3,enum=orchestrator.v1.CalculationStatus" json:"status,omitempty"`
 	// Результат, если вычисление завершено.
 	Result string `protobuf:"bytes,3,opt,name=result,proto3" json:"result,omitempty"`
 	// Сообщение об ошибке, если вычисление не удалось.
@@ -121,11 +297,11 @@ func (x *CalculateResponse) GetId() string {
 	return ""
 }
 
-func (x *CalculateResponse) GetStatus() int32 {
+func (x *CalculateResponse) GetStatus() CalculationStatus {
 	if x != nil {
 		return x.Status
 	}
-	return 0
+	return CalculationStatus_PENDING
 }
 
 func (x *CalculateResponse) GetResult() string {
@@ -200,7 +376,7 @@ type GetCalculationResponse struct {
 	// Результат вычисления.
 	Result string `protobuf:"bytes,4,opt,name=result,proto3" json:"result,omitempty"`
 	// Статус вычисления.
-	Status int32 `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`
+	Status CalculationStatus `protobuf:"varint,5,opt,name=status,proto3,enum=orchestrator.v1.CalculationStatus" json:"status,omitempty"`
 	// Сообщение об ошибке.
 	ErrorMessage string `protobuf:"bytes,6,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	// Время создания.
@@ -269,11 +445,11 @@ func (x *GetCalculationResponse) GetResult() string {
 	return ""
 }
 
-func (x *GetCalculationResponse) GetStatus() int32 {
+func (x *GetCalculationResponse) GetStatus() CalculationStatus {
 	if x != nil {
 		return x.Status
 	}
-	return 0
+	return CalculationStatus_PENDING
 }
 
 func (x *GetCalculationResponse) GetErrorMessage() string {
@@ -297,47 +473,10 @@ func (x *GetCalculationResponse) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
-// Запрос на список вычислений пользователя.
-type ListCalculationsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ListCalculationsRequest) Reset() {
-	*x = ListCalculationsRequest{}
-	mi := &file_proto_v1_orchestrator_orchestrator_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ListCalculationsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListCalculationsRequest) ProtoMessage() {}
-
-func (x *ListCalculationsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_v1_orchestrator_orchestrator_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ListCalculationsRequest.ProtoReflect.Descriptor instead.
-func (*ListCalculationsRequest) Descriptor() ([]byte, []int) {
-	return file_proto_v1_orchestrator_orchestrator_proto_rawDescGZIP(), []int{4}
-}
-
 // Ответ со списком вычислений.
 type ListCalculationsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Список вычислений
+	// Список вычислений.
 	Calculations  []*GetCalculationResponse `protobuf:"bytes,1,rep,name=calculations,proto3" json:"calculations,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -345,7 +484,7 @@ type ListCalculationsResponse struct {
 
 func (x *ListCalculationsResponse) Reset() {
 	*x = ListCalculationsResponse{}
-	mi := &file_proto_v1_orchestrator_orchestrator_proto_msgTypes[5]
+	mi := &file_proto_v1_orchestrator_orchestrator_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -357,7 +496,7 @@ func (x *ListCalculationsResponse) String() string {
 func (*ListCalculationsResponse) ProtoMessage() {}
 
 func (x *ListCalculationsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_v1_orchestrator_orchestrator_proto_msgTypes[5]
+	mi := &file_proto_v1_orchestrator_orchestrator_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -370,7 +509,7 @@ func (x *ListCalculationsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCalculationsResponse.ProtoReflect.Descriptor instead.
 func (*ListCalculationsResponse) Descriptor() ([]byte, []int) {
-	return file_proto_v1_orchestrator_orchestrator_proto_rawDescGZIP(), []int{5}
+	return file_proto_v1_orchestrator_orchestrator_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ListCalculationsResponse) GetCalculations() []*GetCalculationResponse {
@@ -380,428 +519,57 @@ func (x *ListCalculationsResponse) GetCalculations() []*GetCalculationResponse {
 	return nil
 }
 
-// Запрос от агента для сообщения о результате операции.
-type ReportOperationResultRequest struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID вычисления.
-	CalculationId string `protobuf:"bytes,1,opt,name=calculation_id,json=calculationId,proto3" json:"calculation_id,omitempty"`
-	// ID операции.
-	OperationId string `protobuf:"bytes,2,opt,name=operation_id,json=operationId,proto3" json:"operation_id,omitempty"`
-	// Результат операции.
-	Result string `protobuf:"bytes,3,opt,name=result,proto3" json:"result,omitempty"`
-	// Успешность операции.
-	Success bool `protobuf:"varint,4,opt,name=success,proto3" json:"success,omitempty"`
-	// Сообщение об ошибке.
-	ErrorMessage  string `protobuf:"bytes,5,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ReportOperationResultRequest) Reset() {
-	*x = ReportOperationResultRequest{}
-	mi := &file_proto_v1_orchestrator_orchestrator_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ReportOperationResultRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ReportOperationResultRequest) ProtoMessage() {}
-
-func (x *ReportOperationResultRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_v1_orchestrator_orchestrator_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ReportOperationResultRequest.ProtoReflect.Descriptor instead.
-func (*ReportOperationResultRequest) Descriptor() ([]byte, []int) {
-	return file_proto_v1_orchestrator_orchestrator_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *ReportOperationResultRequest) GetCalculationId() string {
-	if x != nil {
-		return x.CalculationId
-	}
-	return ""
-}
-
-func (x *ReportOperationResultRequest) GetOperationId() string {
-	if x != nil {
-		return x.OperationId
-	}
-	return ""
-}
-
-func (x *ReportOperationResultRequest) GetResult() string {
-	if x != nil {
-		return x.Result
-	}
-	return ""
-}
-
-func (x *ReportOperationResultRequest) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
-}
-
-func (x *ReportOperationResultRequest) GetErrorMessage() string {
-	if x != nil {
-		return x.ErrorMessage
-	}
-	return ""
-}
-
-// Ответ на сообщение о результате операции.
-type ReportOperationResultResponse struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Подтверждение получения.
-	Received      bool `protobuf:"varint,1,opt,name=received,proto3" json:"received,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ReportOperationResultResponse) Reset() {
-	*x = ReportOperationResultResponse{}
-	mi := &file_proto_v1_orchestrator_orchestrator_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ReportOperationResultResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ReportOperationResultResponse) ProtoMessage() {}
-
-func (x *ReportOperationResultResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_v1_orchestrator_orchestrator_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ReportOperationResultResponse.ProtoReflect.Descriptor instead.
-func (*ReportOperationResultResponse) Descriptor() ([]byte, []int) {
-	return file_proto_v1_orchestrator_orchestrator_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *ReportOperationResultResponse) GetReceived() bool {
-	if x != nil {
-		return x.Received
-	}
-	return false
-}
-
-// Запрос на регистрацию агента в оркестраторе.
-type RegisterAgentRequest struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID агента.
-	AgentId string `protobuf:"bytes,1,opt,name=agent_id,json=agentId,proto3" json:"agent_id,omitempty"`
-	// Адрес агента.
-	Endpoint string `protobuf:"bytes,2,opt,name=endpoint,proto3" json:"endpoint,omitempty"`
-	// Карта стоимостей операций (тип операции -> время обработки).
-	OperationCosts map[string]int32 `protobuf:"bytes,3,rep,name=operation_costs,json=operationCosts,proto3" json:"operation_costs,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
-}
-
-func (x *RegisterAgentRequest) Reset() {
-	*x = RegisterAgentRequest{}
-	mi := &file_proto_v1_orchestrator_orchestrator_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RegisterAgentRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RegisterAgentRequest) ProtoMessage() {}
-
-func (x *RegisterAgentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_v1_orchestrator_orchestrator_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RegisterAgentRequest.ProtoReflect.Descriptor instead.
-func (*RegisterAgentRequest) Descriptor() ([]byte, []int) {
-	return file_proto_v1_orchestrator_orchestrator_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *RegisterAgentRequest) GetAgentId() string {
-	if x != nil {
-		return x.AgentId
-	}
-	return ""
-}
-
-func (x *RegisterAgentRequest) GetEndpoint() string {
-	if x != nil {
-		return x.Endpoint
-	}
-	return ""
-}
-
-func (x *RegisterAgentRequest) GetOperationCosts() map[string]int32 {
-	if x != nil {
-		return x.OperationCosts
-	}
-	return nil
-}
-
-// Ответ на запрос регистрации агента.
-type RegisterAgentResponse struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Подтверждение регистрации.
-	Registered bool `protobuf:"varint,1,opt,name=registered,proto3" json:"registered,omitempty"`
-	// ID оркестратора.
-	OrchestratorId string `protobuf:"bytes,2,opt,name=orchestrator_id,json=orchestratorId,proto3" json:"orchestrator_id,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
-}
-
-func (x *RegisterAgentResponse) Reset() {
-	*x = RegisterAgentResponse{}
-	mi := &file_proto_v1_orchestrator_orchestrator_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RegisterAgentResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RegisterAgentResponse) ProtoMessage() {}
-
-func (x *RegisterAgentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_v1_orchestrator_orchestrator_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RegisterAgentResponse.ProtoReflect.Descriptor instead.
-func (*RegisterAgentResponse) Descriptor() ([]byte, []int) {
-	return file_proto_v1_orchestrator_orchestrator_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *RegisterAgentResponse) GetRegistered() bool {
-	if x != nil {
-		return x.Registered
-	}
-	return false
-}
-
-func (x *RegisterAgentResponse) GetOrchestratorId() string {
-	if x != nil {
-		return x.OrchestratorId
-	}
-	return ""
-}
-
-// Запрос на отправку сигнала работоспособности.
-type AgentHeartbeatRequest struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID агента.
-	AgentId string `protobuf:"bytes,1,opt,name=agent_id,json=agentId,proto3" json:"agent_id,omitempty"`
-	// Текущая нагрузка.
-	CurrentLoad int32 `protobuf:"varint,2,opt,name=current_load,json=currentLoad,proto3" json:"current_load,omitempty"`
-	// Максимальная емкость.
-	MaxCapacity   int32 `protobuf:"varint,3,opt,name=max_capacity,json=maxCapacity,proto3" json:"max_capacity,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AgentHeartbeatRequest) Reset() {
-	*x = AgentHeartbeatRequest{}
-	mi := &file_proto_v1_orchestrator_orchestrator_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AgentHeartbeatRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AgentHeartbeatRequest) ProtoMessage() {}
-
-func (x *AgentHeartbeatRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_v1_orchestrator_orchestrator_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AgentHeartbeatRequest.ProtoReflect.Descriptor instead.
-func (*AgentHeartbeatRequest) Descriptor() ([]byte, []int) {
-	return file_proto_v1_orchestrator_orchestrator_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *AgentHeartbeatRequest) GetAgentId() string {
-	if x != nil {
-		return x.AgentId
-	}
-	return ""
-}
-
-func (x *AgentHeartbeatRequest) GetCurrentLoad() int32 {
-	if x != nil {
-		return x.CurrentLoad
-	}
-	return 0
-}
-
-func (x *AgentHeartbeatRequest) GetMaxCapacity() int32 {
-	if x != nil {
-		return x.MaxCapacity
-	}
-	return 0
-}
-
-// Ответ на сигнал работоспособности.
-type AgentHeartbeatResponse struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Подтверждение получения.
-	Acknowledged  bool `protobuf:"varint,1,opt,name=acknowledged,proto3" json:"acknowledged,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AgentHeartbeatResponse) Reset() {
-	*x = AgentHeartbeatResponse{}
-	mi := &file_proto_v1_orchestrator_orchestrator_proto_msgTypes[11]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AgentHeartbeatResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AgentHeartbeatResponse) ProtoMessage() {}
-
-func (x *AgentHeartbeatResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_v1_orchestrator_orchestrator_proto_msgTypes[11]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AgentHeartbeatResponse.ProtoReflect.Descriptor instead.
-func (*AgentHeartbeatResponse) Descriptor() ([]byte, []int) {
-	return file_proto_v1_orchestrator_orchestrator_proto_rawDescGZIP(), []int{11}
-}
-
-func (x *AgentHeartbeatResponse) GetAcknowledged() bool {
-	if x != nil {
-		return x.Acknowledged
-	}
-	return false
-}
-
 var File_proto_v1_orchestrator_orchestrator_proto protoreflect.FileDescriptor
 
 const file_proto_v1_orchestrator_orchestrator_proto_rawDesc = "" +
 	"\n" +
-	"(proto/v1/orchestrator/orchestrator.proto\x12\x0forchestrator.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/api/annotations.proto\"2\n" +
+	"(proto/v1/orchestrator/orchestrator.proto\x12\x0forchestrator.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/api/annotations.proto\"2\n" +
 	"\x10CalculateRequest\x12\x1e\n" +
 	"\n" +
 	"expression\x18\x01 \x01(\tR\n" +
-	"expression\"x\n" +
+	"expression\"\x9c\x01\n" +
 	"\x11CalculateResponse\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\x05R\x06status\x12\x16\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12:\n" +
+	"\x06status\x18\x02 \x01(\x0e2\".orchestrator.v1.CalculationStatusR\x06status\x12\x16\n" +
 	"\x06result\x18\x03 \x01(\tR\x06result\x12#\n" +
 	"\rerror_message\x18\x04 \x01(\tR\ferrorMessage\"'\n" +
 	"\x15GetCalculationRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\xac\x02\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\xd0\x02\n" +
 	"\x16GetCalculationResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1e\n" +
 	"\n" +
 	"expression\x18\x03 \x01(\tR\n" +
 	"expression\x12\x16\n" +
-	"\x06result\x18\x04 \x01(\tR\x06result\x12\x16\n" +
-	"\x06status\x18\x05 \x01(\x05R\x06status\x12#\n" +
+	"\x06result\x18\x04 \x01(\tR\x06result\x12:\n" +
+	"\x06status\x18\x05 \x01(\x0e2\".orchestrator.v1.CalculationStatusR\x06status\x12#\n" +
 	"\rerror_message\x18\x06 \x01(\tR\ferrorMessage\x129\n" +
 	"\n" +
 	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x19\n" +
-	"\x17ListCalculationsRequest\"g\n" +
+	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"g\n" +
 	"\x18ListCalculationsResponse\x12K\n" +
-	"\fcalculations\x18\x01 \x03(\v2'.orchestrator.v1.GetCalculationResponseR\fcalculations\"\xbf\x01\n" +
-	"\x1cReportOperationResultRequest\x12%\n" +
-	"\x0ecalculation_id\x18\x01 \x01(\tR\rcalculationId\x12!\n" +
-	"\foperation_id\x18\x02 \x01(\tR\voperationId\x12\x16\n" +
-	"\x06result\x18\x03 \x01(\tR\x06result\x12\x18\n" +
-	"\asuccess\x18\x04 \x01(\bR\asuccess\x12#\n" +
-	"\rerror_message\x18\x05 \x01(\tR\ferrorMessage\";\n" +
-	"\x1dReportOperationResultResponse\x12\x1a\n" +
-	"\breceived\x18\x01 \x01(\bR\breceived\"\xf4\x01\n" +
-	"\x14RegisterAgentRequest\x12\x19\n" +
-	"\bagent_id\x18\x01 \x01(\tR\aagentId\x12\x1a\n" +
-	"\bendpoint\x18\x02 \x01(\tR\bendpoint\x12b\n" +
-	"\x0foperation_costs\x18\x03 \x03(\v29.orchestrator.v1.RegisterAgentRequest.OperationCostsEntryR\x0eoperationCosts\x1aA\n" +
-	"\x13OperationCostsEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\x05R\x05value:\x028\x01\"`\n" +
-	"\x15RegisterAgentResponse\x12\x1e\n" +
-	"\n" +
-	"registered\x18\x01 \x01(\bR\n" +
-	"registered\x12'\n" +
-	"\x0forchestrator_id\x18\x02 \x01(\tR\x0eorchestratorId\"x\n" +
-	"\x15AgentHeartbeatRequest\x12\x19\n" +
-	"\bagent_id\x18\x01 \x01(\tR\aagentId\x12!\n" +
-	"\fcurrent_load\x18\x02 \x01(\x05R\vcurrentLoad\x12!\n" +
-	"\fmax_capacity\x18\x03 \x01(\x05R\vmaxCapacity\"<\n" +
-	"\x16AgentHeartbeatResponse\x12\"\n" +
-	"\facknowledged\x18\x01 \x01(\bR\facknowledged2\xd1\x05\n" +
+	"\fcalculations\x18\x01 \x03(\v2'.orchestrator.v1.GetCalculationResponseR\fcalculations*K\n" +
+	"\x11CalculationStatus\x12\v\n" +
+	"\aPENDING\x10\x00\x12\x0f\n" +
+	"\vIN_PROGRESS\x10\x01\x12\r\n" +
+	"\tCOMPLETED\x10\x02\x12\t\n" +
+	"\x05ERROR\x10\x03*q\n" +
+	"\x0fOperationStatus\x12\x15\n" +
+	"\x11OPERATION_PENDING\x10\x00\x12\x19\n" +
+	"\x15OPERATION_IN_PROGRESS\x10\x01\x12\x17\n" +
+	"\x13OPERATION_COMPLETED\x10\x02\x12\x13\n" +
+	"\x0fOPERATION_ERROR\x10\x03*z\n" +
+	"\rOperationType\x12\x14\n" +
+	"\x10TYPE_UNSPECIFIED\x10\x00\x12\x11\n" +
+	"\rTYPE_ADDITION\x10\x01\x12\x14\n" +
+	"\x10TYPE_SUBTRACTION\x10\x02\x12\x17\n" +
+	"\x13TYPE_MULTIPLICATION\x10\x03\x12\x11\n" +
+	"\rTYPE_DIVISION\x10\x042\x83\x03\n" +
 	"\x13OrchestratorService\x12p\n" +
 	"\tCalculate\x12!.orchestrator.v1.CalculateRequest\x1a\".orchestrator.v1.CalculateResponse\"\x1c\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/api/v1/calculate\x12\x84\x01\n" +
-	"\x0eGetCalculation\x12&.orchestrator.v1.GetCalculationRequest\x1a'.orchestrator.v1.GetCalculationResponse\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/api/v1/calculations/{id}\x12\x85\x01\n" +
-	"\x10ListCalculations\x12(.orchestrator.v1.ListCalculationsRequest\x1a).orchestrator.v1.ListCalculationsResponse\"\x1c\x82\xd3\xe4\x93\x02\x16\x12\x14/api/v1/calculations\x12v\n" +
-	"\x15ReportOperationResult\x12-.orchestrator.v1.ReportOperationResultRequest\x1a..orchestrator.v1.ReportOperationResultResponse\x12^\n" +
-	"\rRegisterAgent\x12%.orchestrator.v1.RegisterAgentRequest\x1a&.orchestrator.v1.RegisterAgentResponse\x12a\n" +
-	"\x0eAgentHeartbeat\x12&.orchestrator.v1.AgentHeartbeatRequest\x1a'.orchestrator.v1.AgentHeartbeatResponseBWZUgithub.com/flexer2006/y.lms-final-task-calc-go/pkg/api/orchestrator/v1;orchestratorv1b\x06proto3"
+	"\x0eGetCalculation\x12&.orchestrator.v1.GetCalculationRequest\x1a'.orchestrator.v1.GetCalculationResponse\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/api/v1/calculations/{id}\x12s\n" +
+	"\x10ListCalculations\x12\x16.google.protobuf.Empty\x1a).orchestrator.v1.ListCalculationsResponse\"\x1c\x82\xd3\xe4\x93\x02\x16\x12\x14/api/v1/calculationsBWZUgithub.com/flexer2006/y.lms-final-task-calc-go/pkg/api/orchestrator/v1;orchestratorv1b\x06proto3"
 
 var (
 	file_proto_v1_orchestrator_orchestrator_proto_rawDescOnce sync.Once
@@ -815,45 +583,37 @@ func file_proto_v1_orchestrator_orchestrator_proto_rawDescGZIP() []byte {
 	return file_proto_v1_orchestrator_orchestrator_proto_rawDescData
 }
 
-var file_proto_v1_orchestrator_orchestrator_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_proto_v1_orchestrator_orchestrator_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_proto_v1_orchestrator_orchestrator_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_proto_v1_orchestrator_orchestrator_proto_goTypes = []any{
-	(*CalculateRequest)(nil),              // 0: orchestrator.v1.CalculateRequest
-	(*CalculateResponse)(nil),             // 1: orchestrator.v1.CalculateResponse
-	(*GetCalculationRequest)(nil),         // 2: orchestrator.v1.GetCalculationRequest
-	(*GetCalculationResponse)(nil),        // 3: orchestrator.v1.GetCalculationResponse
-	(*ListCalculationsRequest)(nil),       // 4: orchestrator.v1.ListCalculationsRequest
-	(*ListCalculationsResponse)(nil),      // 5: orchestrator.v1.ListCalculationsResponse
-	(*ReportOperationResultRequest)(nil),  // 6: orchestrator.v1.ReportOperationResultRequest
-	(*ReportOperationResultResponse)(nil), // 7: orchestrator.v1.ReportOperationResultResponse
-	(*RegisterAgentRequest)(nil),          // 8: orchestrator.v1.RegisterAgentRequest
-	(*RegisterAgentResponse)(nil),         // 9: orchestrator.v1.RegisterAgentResponse
-	(*AgentHeartbeatRequest)(nil),         // 10: orchestrator.v1.AgentHeartbeatRequest
-	(*AgentHeartbeatResponse)(nil),        // 11: orchestrator.v1.AgentHeartbeatResponse
-	nil,                                   // 12: orchestrator.v1.RegisterAgentRequest.OperationCostsEntry
-	(*timestamppb.Timestamp)(nil),         // 13: google.protobuf.Timestamp
+	(CalculationStatus)(0),           // 0: orchestrator.v1.CalculationStatus
+	(OperationStatus)(0),             // 1: orchestrator.v1.OperationStatus
+	(OperationType)(0),               // 2: orchestrator.v1.OperationType
+	(*CalculateRequest)(nil),         // 3: orchestrator.v1.CalculateRequest
+	(*CalculateResponse)(nil),        // 4: orchestrator.v1.CalculateResponse
+	(*GetCalculationRequest)(nil),    // 5: orchestrator.v1.GetCalculationRequest
+	(*GetCalculationResponse)(nil),   // 6: orchestrator.v1.GetCalculationResponse
+	(*ListCalculationsResponse)(nil), // 7: orchestrator.v1.ListCalculationsResponse
+	(*timestamppb.Timestamp)(nil),    // 8: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),            // 9: google.protobuf.Empty
 }
 var file_proto_v1_orchestrator_orchestrator_proto_depIdxs = []int32{
-	13, // 0: orchestrator.v1.GetCalculationResponse.created_at:type_name -> google.protobuf.Timestamp
-	13, // 1: orchestrator.v1.GetCalculationResponse.updated_at:type_name -> google.protobuf.Timestamp
-	3,  // 2: orchestrator.v1.ListCalculationsResponse.calculations:type_name -> orchestrator.v1.GetCalculationResponse
-	12, // 3: orchestrator.v1.RegisterAgentRequest.operation_costs:type_name -> orchestrator.v1.RegisterAgentRequest.OperationCostsEntry
-	0,  // 4: orchestrator.v1.OrchestratorService.Calculate:input_type -> orchestrator.v1.CalculateRequest
-	2,  // 5: orchestrator.v1.OrchestratorService.GetCalculation:input_type -> orchestrator.v1.GetCalculationRequest
-	4,  // 6: orchestrator.v1.OrchestratorService.ListCalculations:input_type -> orchestrator.v1.ListCalculationsRequest
-	6,  // 7: orchestrator.v1.OrchestratorService.ReportOperationResult:input_type -> orchestrator.v1.ReportOperationResultRequest
-	8,  // 8: orchestrator.v1.OrchestratorService.RegisterAgent:input_type -> orchestrator.v1.RegisterAgentRequest
-	10, // 9: orchestrator.v1.OrchestratorService.AgentHeartbeat:input_type -> orchestrator.v1.AgentHeartbeatRequest
-	1,  // 10: orchestrator.v1.OrchestratorService.Calculate:output_type -> orchestrator.v1.CalculateResponse
-	3,  // 11: orchestrator.v1.OrchestratorService.GetCalculation:output_type -> orchestrator.v1.GetCalculationResponse
-	5,  // 12: orchestrator.v1.OrchestratorService.ListCalculations:output_type -> orchestrator.v1.ListCalculationsResponse
-	7,  // 13: orchestrator.v1.OrchestratorService.ReportOperationResult:output_type -> orchestrator.v1.ReportOperationResultResponse
-	9,  // 14: orchestrator.v1.OrchestratorService.RegisterAgent:output_type -> orchestrator.v1.RegisterAgentResponse
-	11, // 15: orchestrator.v1.OrchestratorService.AgentHeartbeat:output_type -> orchestrator.v1.AgentHeartbeatResponse
-	10, // [10:16] is the sub-list for method output_type
-	4,  // [4:10] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	0, // 0: orchestrator.v1.CalculateResponse.status:type_name -> orchestrator.v1.CalculationStatus
+	0, // 1: orchestrator.v1.GetCalculationResponse.status:type_name -> orchestrator.v1.CalculationStatus
+	8, // 2: orchestrator.v1.GetCalculationResponse.created_at:type_name -> google.protobuf.Timestamp
+	8, // 3: orchestrator.v1.GetCalculationResponse.updated_at:type_name -> google.protobuf.Timestamp
+	6, // 4: orchestrator.v1.ListCalculationsResponse.calculations:type_name -> orchestrator.v1.GetCalculationResponse
+	3, // 5: orchestrator.v1.OrchestratorService.Calculate:input_type -> orchestrator.v1.CalculateRequest
+	5, // 6: orchestrator.v1.OrchestratorService.GetCalculation:input_type -> orchestrator.v1.GetCalculationRequest
+	9, // 7: orchestrator.v1.OrchestratorService.ListCalculations:input_type -> google.protobuf.Empty
+	4, // 8: orchestrator.v1.OrchestratorService.Calculate:output_type -> orchestrator.v1.CalculateResponse
+	6, // 9: orchestrator.v1.OrchestratorService.GetCalculation:output_type -> orchestrator.v1.GetCalculationResponse
+	7, // 10: orchestrator.v1.OrchestratorService.ListCalculations:output_type -> orchestrator.v1.ListCalculationsResponse
+	8, // [8:11] is the sub-list for method output_type
+	5, // [5:8] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_proto_v1_orchestrator_orchestrator_proto_init() }
@@ -866,13 +626,14 @@ func file_proto_v1_orchestrator_orchestrator_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_v1_orchestrator_orchestrator_proto_rawDesc), len(file_proto_v1_orchestrator_orchestrator_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   13,
+			NumEnums:      3,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_proto_v1_orchestrator_orchestrator_proto_goTypes,
 		DependencyIndexes: file_proto_v1_orchestrator_orchestrator_proto_depIdxs,
+		EnumInfos:         file_proto_v1_orchestrator_orchestrator_proto_enumTypes,
 		MessageInfos:      file_proto_v1_orchestrator_orchestrator_proto_msgTypes,
 	}.Build()
 	File_proto_v1_orchestrator_orchestrator_proto = out.File

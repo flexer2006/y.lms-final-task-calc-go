@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -19,32 +20,23 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	OrchestratorService_Calculate_FullMethodName             = "/orchestrator.v1.OrchestratorService/Calculate"
-	OrchestratorService_GetCalculation_FullMethodName        = "/orchestrator.v1.OrchestratorService/GetCalculation"
-	OrchestratorService_ListCalculations_FullMethodName      = "/orchestrator.v1.OrchestratorService/ListCalculations"
-	OrchestratorService_ReportOperationResult_FullMethodName = "/orchestrator.v1.OrchestratorService/ReportOperationResult"
-	OrchestratorService_RegisterAgent_FullMethodName         = "/orchestrator.v1.OrchestratorService/RegisterAgent"
-	OrchestratorService_AgentHeartbeat_FullMethodName        = "/orchestrator.v1.OrchestratorService/AgentHeartbeat"
+	OrchestratorService_Calculate_FullMethodName        = "/orchestrator.v1.OrchestratorService/Calculate"
+	OrchestratorService_GetCalculation_FullMethodName   = "/orchestrator.v1.OrchestratorService/GetCalculation"
+	OrchestratorService_ListCalculations_FullMethodName = "/orchestrator.v1.OrchestratorService/ListCalculations"
 )
 
 // OrchestratorServiceClient is the client API for OrchestratorService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// OrchestratorService координирует запросы на вычисления и управляет агентами.
+// OrchestratorService координирует запросы на вычисления.
 type OrchestratorServiceClient interface {
 	// Вычисление арифметического выражения.
 	Calculate(ctx context.Context, in *CalculateRequest, opts ...grpc.CallOption) (*CalculateResponse, error)
 	// Получение статуса вычисления по ID.
 	GetCalculation(ctx context.Context, in *GetCalculationRequest, opts ...grpc.CallOption) (*GetCalculationResponse, error)
 	// Получение списка всех вычислений пользователя.
-	ListCalculations(ctx context.Context, in *ListCalculationsRequest, opts ...grpc.CallOption) (*ListCalculationsResponse, error)
-	// Внутренний метод для агентов для сообщения о завершении операции.
-	ReportOperationResult(ctx context.Context, in *ReportOperationResultRequest, opts ...grpc.CallOption) (*ReportOperationResultResponse, error)
-	// Регистрация нового агента в оркестраторе.
-	RegisterAgent(ctx context.Context, in *RegisterAgentRequest, opts ...grpc.CallOption) (*RegisterAgentResponse, error)
-	// Сигнал работоспособности агента для оркестратора.
-	AgentHeartbeat(ctx context.Context, in *AgentHeartbeatRequest, opts ...grpc.CallOption) (*AgentHeartbeatResponse, error)
+	ListCalculations(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListCalculationsResponse, error)
 }
 
 type orchestratorServiceClient struct {
@@ -75,40 +67,10 @@ func (c *orchestratorServiceClient) GetCalculation(ctx context.Context, in *GetC
 	return out, nil
 }
 
-func (c *orchestratorServiceClient) ListCalculations(ctx context.Context, in *ListCalculationsRequest, opts ...grpc.CallOption) (*ListCalculationsResponse, error) {
+func (c *orchestratorServiceClient) ListCalculations(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListCalculationsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListCalculationsResponse)
 	err := c.cc.Invoke(ctx, OrchestratorService_ListCalculations_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *orchestratorServiceClient) ReportOperationResult(ctx context.Context, in *ReportOperationResultRequest, opts ...grpc.CallOption) (*ReportOperationResultResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ReportOperationResultResponse)
-	err := c.cc.Invoke(ctx, OrchestratorService_ReportOperationResult_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *orchestratorServiceClient) RegisterAgent(ctx context.Context, in *RegisterAgentRequest, opts ...grpc.CallOption) (*RegisterAgentResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RegisterAgentResponse)
-	err := c.cc.Invoke(ctx, OrchestratorService_RegisterAgent_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *orchestratorServiceClient) AgentHeartbeat(ctx context.Context, in *AgentHeartbeatRequest, opts ...grpc.CallOption) (*AgentHeartbeatResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(AgentHeartbeatResponse)
-	err := c.cc.Invoke(ctx, OrchestratorService_AgentHeartbeat_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -119,20 +81,14 @@ func (c *orchestratorServiceClient) AgentHeartbeat(ctx context.Context, in *Agen
 // All implementations must embed UnimplementedOrchestratorServiceServer
 // for forward compatibility.
 //
-// OrchestratorService координирует запросы на вычисления и управляет агентами.
+// OrchestratorService координирует запросы на вычисления.
 type OrchestratorServiceServer interface {
 	// Вычисление арифметического выражения.
 	Calculate(context.Context, *CalculateRequest) (*CalculateResponse, error)
 	// Получение статуса вычисления по ID.
 	GetCalculation(context.Context, *GetCalculationRequest) (*GetCalculationResponse, error)
 	// Получение списка всех вычислений пользователя.
-	ListCalculations(context.Context, *ListCalculationsRequest) (*ListCalculationsResponse, error)
-	// Внутренний метод для агентов для сообщения о завершении операции.
-	ReportOperationResult(context.Context, *ReportOperationResultRequest) (*ReportOperationResultResponse, error)
-	// Регистрация нового агента в оркестраторе.
-	RegisterAgent(context.Context, *RegisterAgentRequest) (*RegisterAgentResponse, error)
-	// Сигнал работоспособности агента для оркестратора.
-	AgentHeartbeat(context.Context, *AgentHeartbeatRequest) (*AgentHeartbeatResponse, error)
+	ListCalculations(context.Context, *emptypb.Empty) (*ListCalculationsResponse, error)
 	mustEmbedUnimplementedOrchestratorServiceServer()
 }
 
@@ -149,17 +105,8 @@ func (UnimplementedOrchestratorServiceServer) Calculate(context.Context, *Calcul
 func (UnimplementedOrchestratorServiceServer) GetCalculation(context.Context, *GetCalculationRequest) (*GetCalculationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCalculation not implemented")
 }
-func (UnimplementedOrchestratorServiceServer) ListCalculations(context.Context, *ListCalculationsRequest) (*ListCalculationsResponse, error) {
+func (UnimplementedOrchestratorServiceServer) ListCalculations(context.Context, *emptypb.Empty) (*ListCalculationsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListCalculations not implemented")
-}
-func (UnimplementedOrchestratorServiceServer) ReportOperationResult(context.Context, *ReportOperationResultRequest) (*ReportOperationResultResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReportOperationResult not implemented")
-}
-func (UnimplementedOrchestratorServiceServer) RegisterAgent(context.Context, *RegisterAgentRequest) (*RegisterAgentResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RegisterAgent not implemented")
-}
-func (UnimplementedOrchestratorServiceServer) AgentHeartbeat(context.Context, *AgentHeartbeatRequest) (*AgentHeartbeatResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AgentHeartbeat not implemented")
 }
 func (UnimplementedOrchestratorServiceServer) mustEmbedUnimplementedOrchestratorServiceServer() {}
 func (UnimplementedOrchestratorServiceServer) testEmbeddedByValue()                             {}
@@ -219,7 +166,7 @@ func _OrchestratorService_GetCalculation_Handler(srv interface{}, ctx context.Co
 }
 
 func _OrchestratorService_ListCalculations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListCalculationsRequest)
+	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -231,61 +178,7 @@ func _OrchestratorService_ListCalculations_Handler(srv interface{}, ctx context.
 		FullMethod: OrchestratorService_ListCalculations_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrchestratorServiceServer).ListCalculations(ctx, req.(*ListCalculationsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _OrchestratorService_ReportOperationResult_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReportOperationResultRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(OrchestratorServiceServer).ReportOperationResult(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: OrchestratorService_ReportOperationResult_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrchestratorServiceServer).ReportOperationResult(ctx, req.(*ReportOperationResultRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _OrchestratorService_RegisterAgent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RegisterAgentRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(OrchestratorServiceServer).RegisterAgent(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: OrchestratorService_RegisterAgent_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrchestratorServiceServer).RegisterAgent(ctx, req.(*RegisterAgentRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _OrchestratorService_AgentHeartbeat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AgentHeartbeatRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(OrchestratorServiceServer).AgentHeartbeat(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: OrchestratorService_AgentHeartbeat_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrchestratorServiceServer).AgentHeartbeat(ctx, req.(*AgentHeartbeatRequest))
+		return srv.(OrchestratorServiceServer).ListCalculations(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -308,18 +201,6 @@ var OrchestratorService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListCalculations",
 			Handler:    _OrchestratorService_ListCalculations_Handler,
-		},
-		{
-			MethodName: "ReportOperationResult",
-			Handler:    _OrchestratorService_ReportOperationResult_Handler,
-		},
-		{
-			MethodName: "RegisterAgent",
-			Handler:    _OrchestratorService_RegisterAgent_Handler,
-		},
-		{
-			MethodName: "AgentHeartbeat",
-			Handler:    _OrchestratorService_AgentHeartbeat_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

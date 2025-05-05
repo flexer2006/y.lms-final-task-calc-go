@@ -11,6 +11,7 @@ import (
 	"github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/jwt"
 	"github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/logger"
 	"github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/orchestrator"
+	orchagent "github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/orchestrator/agent"
 	orchdb "github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/orchestrator/db"
 	orchpgx "github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/orchestrator/db/pgxx"
 	orchpg "github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/orchestrator/db/postgres"
@@ -156,6 +157,11 @@ func (c *OrchestratorConfig) GetOrchestratorGRPCConfig() orchgrpc.Config {
 	return c.Orchestrator.Grpc
 }
 
+// GetOrchestratorAgentConfig возвращает конфигурацию агентов для сервиса оркестрации.
+func (c *OrchestratorConfig) GetOrchestratorAgentConfig() orchagent.Config {
+	return c.Orchestrator.Agent
+}
+
 // GetOrchestratorPostgresConfig возвращает конфигурацию Postgres для сервиса оркестрации.
 func (c *OrchestratorConfig) GetOrchestratorPostgresConfig() orchpg.Config {
 	return c.Orchestrator.Db.Postgres
@@ -208,6 +214,21 @@ func (c *OrchestratorConfig) GetRefreshTokenTTL() time.Duration {
 // GetShutdownTimeout возвращает timeout для graceful shutdown.
 func (c *OrchestratorConfig) GetShutdownTimeout() time.Duration {
 	return c.getShutdownTimeout()
+}
+
+// GetAgentComputerPower возвращает количество агентов для вычислений.
+func (c *OrchestratorConfig) GetAgentComputerPower() int {
+	return c.Orchestrator.Agent.ComputerPower
+}
+
+// GetAgentOperationTimes возвращает времена выполнения операций для агентов.
+func (c *OrchestratorConfig) GetAgentOperationTimes() map[string]time.Duration {
+	return map[string]time.Duration{
+		"addition":       c.Orchestrator.Agent.TimeAddition,
+		"subtraction":    c.Orchestrator.Agent.TimeSubtraction,
+		"multiplication": c.Orchestrator.Agent.TimeMultiplications,
+		"division":       c.Orchestrator.Agent.TimeDivisions,
+	}
 }
 
 // GetLoggerConfig возвращает конфигурацию журнал.
