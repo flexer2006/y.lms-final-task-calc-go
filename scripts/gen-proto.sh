@@ -38,13 +38,25 @@ echo "Генерация Go-кода из proto файлов в pkg/api/proto/v1
 # Генерация Go-кода для всех proto-файлов в нужную директорию
 protoc \
     --proto_path="${PROJECT_ROOT}" \
-    --go_out="${PROJECT_ROOT}/pkg/api/proto" \
-    --go_opt=paths=import \
-    --go-grpc_out="${PROJECT_ROOT}/pkg/api/proto" \
-    --go-grpc_opt=paths=import \
+    --go_out="${PROJECT_ROOT}" \
+    --go_opt=paths=source_relative \
+    --go-grpc_out="${PROJECT_ROOT}" \
+    --go-grpc_opt=paths=source_relative \
     proto/v1/agent/agent.proto \
     proto/v1/auth/auth.proto \
     proto/v1/common/common.proto \
     proto/v1/orchestrator/orchestrator.proto
+
+# Перемещаем сгенерированные файлы в нужную директорию
+mkdir -p ${PROJECT_ROOT}/pkg/api/proto/v1/agent
+mkdir -p ${PROJECT_ROOT}/pkg/api/proto/v1/auth
+mkdir -p ${PROJECT_ROOT}/pkg/api/proto/v1/common
+mkdir -p ${PROJECT_ROOT}/pkg/api/proto/v1/orchestrator
+
+# Перемещаем сгенерированные файлы в нужную папку
+mv ${PROJECT_ROOT}/proto/v1/agent/*.go ${PROJECT_ROOT}/pkg/api/proto/v1/agent/ 2>/dev/null || true
+mv ${PROJECT_ROOT}/proto/v1/auth/*.go ${PROJECT_ROOT}/pkg/api/proto/v1/auth/ 2>/dev/null || true
+mv ${PROJECT_ROOT}/proto/v1/common/*.go ${PROJECT_ROOT}/pkg/api/proto/v1/common/ 2>/dev/null || true
+mv ${PROJECT_ROOT}/proto/v1/orchestrator/*.go ${PROJECT_ROOT}/pkg/api/proto/v1/orchestrator/ 2>/dev/null || true
 
 echo "Код успешно сгенерирован в директории pkg/api/proto/v1"
