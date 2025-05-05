@@ -1,0 +1,159 @@
+syntax = "proto3";
+
+package orchestrator.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+
+option go_package = "github.com/flexer2006/y.lms-final-task-calc-go/pkg/api/orchestrator/v1;orchestratorv1";
+
+// OrchestratorService координирует запросы на вычисления и управляет агентами.
+service OrchestratorService {
+  // Вычисление арифметического выражения.
+  rpc Calculate(CalculateRequest) returns (CalculateResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/calculate"
+      body: "*"
+    };
+  }
+
+  // Получение статуса вычисления по ID.
+  rpc GetCalculation(GetCalculationRequest) returns (GetCalculationResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/calculations/{id}"
+    };
+  }
+
+  // Получение списка всех вычислений пользователя.
+  rpc ListCalculations(ListCalculationsRequest) returns (ListCalculationsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/calculations"
+    };
+  }
+
+  // Внутренний метод для агентов для сообщения о завершении операции.
+  rpc ReportOperationResult(ReportOperationResultRequest) returns (ReportOperationResultResponse);
+
+  // Регистрация нового агента в оркестраторе.
+  rpc RegisterAgent(RegisterAgentRequest) returns (RegisterAgentResponse);
+
+  // Сигнал работоспособности агента для оркестратора.
+  rpc AgentHeartbeat(AgentHeartbeatRequest) returns (AgentHeartbeatResponse);
+}
+
+// Запрос на вычисление выражения.
+message CalculateRequest {
+  // Арифметическое выражение для вычисления.
+  string expression = 1;
+}
+
+// Ответ с деталями вычисления.
+message CalculateResponse {
+  // Уникальный идентификатор для отслеживания вычисления.
+  string id = 1;
+  
+  // Текущий статус вычисления.
+  int32 status = 2;
+  
+  // Результат, если вычисление завершено.
+  string result = 3;
+  
+  // Сообщение об ошибке, если вычисление не удалось.
+  string error_message = 4;
+}
+
+// Запрос на получение деталей вычисления по ID.
+message GetCalculationRequest {
+  // Идентификатор вычисления.
+  string id = 1;
+}
+
+// Ответ с деталями вычисления.
+message GetCalculationResponse {
+  // Идентификатор вычисления.
+  string id = 1;
+  
+  // Идентификатор пользователя.
+  string user_id = 2;
+  
+  // Исходное выражение.
+  string expression = 3;
+  
+  // Результат вычисления.
+  string result = 4;
+  
+  // Статус вычисления.
+  int32 status = 5;
+  
+  // Сообщение об ошибке.
+  string error_message = 6;
+  
+  // Время создания.
+  google.protobuf.Timestamp created_at = 7;
+  
+  // Время последнего обновления.
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+// Запрос на список вычислений пользователя.
+message ListCalculationsRequest {}
+
+// Ответ со списком вычислений.
+message ListCalculationsResponse {
+  // Список вычислений
+  repeated GetCalculationResponse calculations = 1;
+}
+
+// Запрос от агента для сообщения о результате операции.
+message ReportOperationResultRequest {
+  // ID вычисления.
+  string calculation_id = 1;
+  // ID операции.
+  string operation_id = 2;
+  // Результат операции.
+  string result = 3;
+  // Успешность операции.
+  bool success = 4;
+  // Сообщение об ошибке.
+  string error_message = 5;
+}
+
+// Ответ на сообщение о результате операции.
+message ReportOperationResultResponse {
+  // Подтверждение получения.
+  bool received = 1;
+}
+
+// Запрос на регистрацию агента в оркестраторе.
+message RegisterAgentRequest {
+  // ID агента.
+  string agent_id = 1;
+  // Адрес агента.
+  string endpoint = 2;
+  // Карта стоимостей операций (тип операции -> время обработки).
+  map<string, int32> operation_costs = 3;
+}
+
+// Ответ на запрос регистрации агента.
+message RegisterAgentResponse {
+  // Подтверждение регистрации.
+  bool registered = 1;
+  // ID оркестратора.
+  string orchestrator_id = 2;
+}
+
+// Запрос на отправку сигнала работоспособности.
+message AgentHeartbeatRequest {
+  // ID агента.
+  string agent_id = 1;
+  // Текущая нагрузка.
+  int32 current_load = 2;
+  // Максимальная емкость.
+  int32 max_capacity = 3;
+}
+
+// Ответ на сигнал работоспособности.
+message AgentHeartbeatResponse {
+  // Подтверждение получения.
+  bool acknowledged = 1;
+}

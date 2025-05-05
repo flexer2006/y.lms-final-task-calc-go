@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package auth.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+
+option go_package = "github.com/flexer2006/y.lms-final-task-calc-go/pkg/api/auth/v1;authv1";
+
+// AuthService предоставляет функциональность аутентификации.
+service AuthService {
+  // Регистрация нового пользователя.
+  rpc Register(RegisterRequest) returns (RegisterResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/register"
+      body: "*"
+    };
+  }
+
+  // Вход существующего пользователя.
+  rpc Login(LoginRequest) returns (LoginResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/login"
+      body: "*"
+    };
+  }
+
+  // Проверка JWT токена (для внутреннего использования).
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+}
+
+// Запрос на регистрацию.
+message RegisterRequest {
+  // Имя пользователя.
+  string login = 1;
+  // Пароль.
+  string password = 2;
+}
+
+// Ответ на запрос регистрации.
+message RegisterResponse {
+  // Идентификатор пользователя.
+  string user_id = 1;
+}
+
+// Запрос на вход.
+message LoginRequest {
+  // Имя пользователя.
+  string login = 1;
+  // Пароль.
+  string password = 2;
+}
+
+// Ответ на запрос входа.
+message LoginResponse {
+  // Идентификатор пользователя.
+  string user_id = 1;
+  // Имя пользователя.
+  string login = 2;
+  // JWT токен доступа.
+  string access_token = 3;
+  // JWT токен обновления.
+  string refresh_token = 4;
+  // Время истечения токена.
+  google.protobuf.Timestamp expires_at = 5;
+}
+
+// Запрос на проверку токена (для внутреннего использования).
+message ValidateTokenRequest {
+  // Токен для проверки.
+  string token = 1;
+}
+
+// Ответ на запрос проверки токена.
+message ValidateTokenResponse {
+  // Идентификатор пользователя.
+  string user_id = 1;
+  // Валидность токена.
+  bool valid = 2;
+}

@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package agent.v1;
+
+option go_package = "github.com/flexer2006/y.lms-final-task-calc-go/pkg/api/agent/v1;agentv1";
+
+// AgentService выполняет арифметические операции и отчитывается оркестратору.
+service AgentService {
+  // Выполнение конкретной арифметической операции.
+  rpc PerformOperation(PerformOperationRequest) returns (PerformOperationResponse);
+  
+  // Проверка работоспособности агента.
+  rpc Healthcheck(HealthcheckRequest) returns (HealthcheckResponse);
+  
+  // Получение статуса и возможностей агента.
+  rpc GetAgentStatus(GetAgentStatusRequest) returns (GetAgentStatusResponse);
+}
+
+// Запрос на выполнение операции.
+message PerformOperationRequest {
+  // Уникальный идентификатор операции.
+  string operation_id = 1;
+  
+  // ID вычисления, к которому относится операция.
+  string calculation_id = 2;
+  
+  // Тип арифметической операции.
+  int32 operation_type = 3;
+  
+  // Первый операнд.
+  string operand1 = 4;
+  
+  // Второй операнд.
+  string operand2 = 5;
+}
+
+// Ответ с результатом операции.
+message PerformOperationResponse {
+  // Уникальный идентификатор операции.
+  string operation_id = 1;
+  
+  // Результат операции.
+  string result = 2;
+  
+  // Успешность выполнения операции.
+  bool success = 3;
+  
+  // Сообщение об ошибке, если операция не удалась.
+  string error_message = 4;
+  
+  // Время выполнения операции в миллисекундах.
+  int64 processing_time_ms = 5;
+}
+
+// Запрос на проверку работоспособности.
+message HealthcheckRequest {}
+
+// Ответ на проверку работоспособности.
+message HealthcheckResponse {
+  // Работоспособность.
+  bool healthy = 1;
+  // Версия агента.
+  string version = 2;
+  // ID агента.
+  string agent_id = 3;
+}
+
+// Запрос на получение статуса агента.
+message GetAgentStatusRequest {}
+
+// Ответ с деталями статуса агента.
+message GetAgentStatusResponse {
+  // ID агента.
+  string agent_id = 1;
+  // Статус агента.
+  string status = 2;
+  // Текущая нагрузка.
+  int32 current_load = 3;
+  // Максимальная емкость.
+  int32 max_capacity = 4;
+  
+  // Время обработки операций в миллисекундах.
+  map<string, int32> operation_costs = 5;
+  
+  // Статистика о выполненных операциях.
+  int64 operations_completed = 6;
+  int64 operations_failed = 7;
+  int64 uptime_seconds = 8;
+}

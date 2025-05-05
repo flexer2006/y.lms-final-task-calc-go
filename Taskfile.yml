@@ -6,13 +6,28 @@ tasks:
     cmds:
       - task: lint
       - task: test
-
+  install:
+    desc: "Install dependencies"
+    cmds:
+      - cmd: echo "Warn: before install protoc utility"
+      - cmd: go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+      - cmd: go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+      - cmd: go mod tidy
+      # - go mod vendor
   lint:
     desc: "Run linter"
     cmds:
-      - golangci-lint run ./...
+      - cmd: golangci-lint run ./...
 
   test:
     desc: "Run tests with coverage"
     cmds:
-      - go test -cover ./...
+      - cmd: go test -cover ./...
+      
+  gen-proto:
+    desc: "Clean and generate proto files"
+    cmds:
+      - cmd: chmod +x ./scripts/clean-proto.sh
+      - cmd: ./scripts/clean-proto.sh
+      - cmd: chmod +x ./scripts/gen-proto.sh
+      - cmd: ./scripts/gen-proto.sh
