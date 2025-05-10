@@ -19,6 +19,8 @@ services:
       timeout: 3s
       retries: 3
       start_period: 5s
+    depends_on:
+      - gateway
     networks:
       - app-network
 
@@ -32,11 +34,14 @@ services:
       - POSTGRES_PASSWORD=${AUTH_POSTGRES_DB_PASSWORD:-auth}
     volumes:
       - auth-db-data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
     networks:
       - app-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${AUTH_POSTGRES_DB_USER:-auth}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   orchestrator-db:
     build:
@@ -48,11 +53,82 @@ services:
       - POSTGRES_PASSWORD=${ORCHESTRATOR_POSTGRES_DB_PASSWORD:-orchestrator}
     volumes:
       - orchestrator-db-data:/var/lib/postgresql/data
-    ports:
-      - "5433:5432"
     networks:
       - app-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ORCHESTRATOR_POSTGRES_DB_USER:-orchestrator}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  auth:
+    build:
+      context: ../
+      dockerfile: build/containers/docker/auth.Dockerfile
+    env_file:
+      - .env
+    environment:
+      - AUTH_POSTGRES_DB_HOST=auth-db
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "${AUTH_GRPC_PORT:-50052}"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  orchestrator:
+    build:
+      context: ../
+      dockerfile: build/containers/docker/orchestrator.Dockerfile
+    env_file:
+      - .env
+    environment:
+      - ORCHESTRATOR_POSTGRES_DB_HOST=orchestrator-db
+    depends_on:
+      orchestrator-db:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "${ORCHESTRATOR_GRPC_PORT:-50053}"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  gateway:
+    build:
+      context: ../
+      dockerfile: build/containers/docker/gateway.Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "${HTTP_PORT:-8080}:${HTTP_PORT:-8080}"
+    environment:
+      - AUTH_GRPC_HOST=auth
+      - ORCHESTRATOR_GRPC_HOST=orchestrator
+    depends_on:
+      auth:
+        condition: service_healthy
+      orchestrator:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${HTTP_PORT:-8080}/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
 networks:
   app-network:

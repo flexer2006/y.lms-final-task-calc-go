@@ -4,21 +4,18 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/auth"
-	authdb "github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/auth/db"
 	authpgx "github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/auth/db/pgxx"
+	authpg "github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/auth/db/postgres"
 	authgrpc "github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/auth/grpc"
 	"github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/jwt"
 	"github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/logger"
-	"github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/orchestrator"
 	orchagent "github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/orchestrator/agent"
-	orchdb "github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/orchestrator/db"
 	orchpgx "github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/orchestrator/db/pgxx"
 	orchpg "github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/orchestrator/db/postgres"
 	orchgrpc "github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/orchestrator/grpc"
 	"github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/server"
 	"github.com/flexer2006/y.lms-final-task-calc-go/internal/setup/shutdown"
-	"github.com/flexer2006/y.lms-final-task-calc-go/pkg/database/postgres"
+	"github.com/flexer2006/y.lms-final-task-calc-go/pkg/database"
 )
 
 // BaseConfig содержит общие поля для всех конфигураций.
@@ -28,212 +25,219 @@ type BaseConfig struct {
 	JWT              jwt.Config
 }
 
-// getLoggerConfig возвращает конфигурацию журнала.
-func (c *BaseConfig) getLoggerConfig() logger.Config {
+// AuthConfig содержит конфигурацию для сервиса аутентификации.
+type AuthConfig struct {
+	Logger           logger.Config
+	GracefulShutdown shutdown.Config
+	JWT              jwt.Config
+	AuthGrpc         authgrpc.Config
+	AuthDbPostgres   authpg.Config
+	AuthDbPgx        authpgx.Config
+}
+
+// OrchestratorConfig содержит конфигурацию для сервиса оркестрации.
+type OrchestratorConfig struct {
+	Logger           logger.Config
+	GracefulShutdown shutdown.Config
+	JWT              jwt.Config
+	OrchGrpc         orchgrpc.Config
+	OrchAgent        orchagent.Config
+	OrchDbPostgres   orchpg.Config
+	OrchDbPgx        orchpgx.Config
+}
+
+// ServerConfig содержит конфигурацию для API сервера.
+type ServerConfig struct {
+	Logger           logger.Config
+	GracefulShutdown shutdown.Config
+	JWT              jwt.Config
+	Server           server.Config
+	AuthGrpc         authgrpc.Config
+	OrchGrpc         orchgrpc.Config
+	OrchAgent        orchagent.Config
+}
+
+// GetLoggerConfig возвращает конфигурацию журнала.
+func (c *BaseConfig) GetLoggerConfig() logger.Config {
 	return c.Logger
 }
 
-// getJWTConfig возвращает конфигурацию JWT.
-func (c *BaseConfig) getJWTConfig() jwt.Config {
+// GetJWTConfig возвращает конфигурацию JWT.
+func (c *BaseConfig) GetJWTConfig() jwt.Config {
 	return c.JWT
 }
 
-// getShutdownConfig возвращает конфигурацию graceful shutdown.
-func (c *BaseConfig) getShutdownConfig() shutdown.Config {
+// GetShutdownConfig возвращает конфигурацию graceful shutdown.
+func (c *BaseConfig) GetShutdownConfig() shutdown.Config {
 	return c.GracefulShutdown
 }
 
-// getAccessTokenTTL возвращает время жизни access token.
-func (c *BaseConfig) getAccessTokenTTL() time.Duration {
+// GetAccessTokenTTL возвращает время жизни access token.
+func (c *BaseConfig) GetAccessTokenTTL() time.Duration {
 	return c.JWT.AccessTokenTTL
 }
 
-// getRefreshTokenTTL возвращает время жизни refresh token.
-func (c *BaseConfig) getRefreshTokenTTL() time.Duration {
+// GetRefreshTokenTTL возвращает время жизни refresh token.
+func (c *BaseConfig) GetRefreshTokenTTL() time.Duration {
 	return c.JWT.RefreshTokenTTL
 }
 
-// getShutdownTimeout возвращает timeout для graceful shutdown.
-func (c *BaseConfig) getShutdownTimeout() time.Duration {
+// GetShutdownTimeout возвращает timeout для graceful shutdown.
+func (c *BaseConfig) GetShutdownTimeout() time.Duration {
 	return c.GracefulShutdown.ShutdownTimeout
-}
-
-type AuthConfig struct {
-	BaseConfig
-	Auth auth.Config
-}
-
-type OrchestratorConfig struct {
-	BaseConfig
-	Orchestrator orchestrator.Config
-}
-
-type ServerConfig struct {
-	BaseConfig
-	Server server.Config
 }
 
 // GetLoggerConfig возвращает конфигурацию журнала.
 func (c *AuthConfig) GetLoggerConfig() logger.Config {
-	return c.getLoggerConfig()
+	return c.Logger
 }
 
 // GetJWTConfig возвращает конфигурацию JWT.
 func (c *AuthConfig) GetJWTConfig() jwt.Config {
-	return c.getJWTConfig()
+	return c.JWT
 }
 
 // GetAuthGRPCConfig возвращает конфигурацию gRPC для сервиса авторизации.
 func (c *AuthConfig) GetAuthGRPCConfig() authgrpc.Config {
-	return c.Auth.Grpc
+	return c.AuthGrpc
 }
 
 // GetAuthPostgresConfig возвращает конфигурацию Postgres для сервиса авторизации.
-func (c *AuthConfig) GetAuthPostgresConfig() postgres.Config {
-	return c.Auth.Db.Postgres
+func (c *AuthConfig) GetAuthPostgresConfig() authpg.Config {
+	return c.AuthDbPostgres
 }
 
 // GetAuthPgxConfig возвращает конфигурацию pgx для сервиса авторизации.
 func (c *AuthConfig) GetAuthPgxConfig() authpgx.Config {
-	return c.Auth.Db.Pgx
-}
-
-// GetAuthDBConfig возвращает конфигурацию базы данных для сервиса авторизации.
-func (c *AuthConfig) GetAuthDBConfig() authdb.Config {
-	return c.Auth.Db
+	return c.AuthDbPgx
 }
 
 // GetShutdownConfig возвращает конфигурацию graceful shutdown.
 func (c *AuthConfig) GetShutdownConfig() shutdown.Config {
-	return c.getShutdownConfig()
+	return c.GracefulShutdown
 }
 
 // GetAuthGRPCAddress возвращает адрес gRPC сервера авторизации.
 func (c *AuthConfig) GetAuthGRPCAddress() string {
-	return fmt.Sprintf("%s:%d", c.Auth.Grpc.Host, c.Auth.Grpc.Port)
+	return fmt.Sprintf("%s:%d", c.AuthGrpc.Host, c.AuthGrpc.Port)
 }
 
 // GetConnectionURL возвращает URL-строку подключения для миграций.
 func (c *AuthConfig) GetConnectionURL() string {
-	pg := c.Auth.Db.Postgres
+	pg := c.AuthDbPostgres
 	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		pg.User, pg.Password, pg.Host, pg.Port, pg.Database)
 }
 
 // GetDSN возвращает DSN-строку подключения для Postgres.
 func (c *AuthConfig) GetDSN() string {
-	pg := c.Auth.Db.Postgres
+	pg := c.AuthDbPostgres
 	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		pg.Host, pg.Port, pg.User, pg.Password, pg.Database)
 }
 
 // GetAccessTokenTTL возвращает длительность жизни JWT access token.
 func (c *AuthConfig) GetAccessTokenTTL() time.Duration {
-	return c.getAccessTokenTTL()
+	return c.JWT.AccessTokenTTL
 }
 
 // GetRefreshTokenTTL возвращает длительность жизни JWT refresh token.
 func (c *AuthConfig) GetRefreshTokenTTL() time.Duration {
-	return c.getRefreshTokenTTL()
+	return c.JWT.RefreshTokenTTL
 }
 
 // GetShutdownTimeout возвращает timeout для graceful shutdown.
 func (c *AuthConfig) GetShutdownTimeout() time.Duration {
-	return c.getShutdownTimeout()
+	return c.GracefulShutdown.ShutdownTimeout
 }
 
-// GetLoggerConfig возвращает конфигурацию журнал.
+// GetLoggerConfig возвращает конфигурацию журнала.
 func (c *OrchestratorConfig) GetLoggerConfig() logger.Config {
-	return c.getLoggerConfig()
+	return c.Logger
 }
 
 // GetJWTConfig возвращает конфигурацию JWT.
 func (c *OrchestratorConfig) GetJWTConfig() jwt.Config {
-	return c.getJWTConfig()
+	return c.JWT
 }
 
 // GetOrchestratorGRPCConfig возвращает конфигурацию gRPC для сервиса оркестрации.
 func (c *OrchestratorConfig) GetOrchestratorGRPCConfig() orchgrpc.Config {
-	return c.Orchestrator.Grpc
+	return c.OrchGrpc
 }
 
 // GetOrchestratorAgentConfig возвращает конфигурацию агентов для сервиса оркестрации.
 func (c *OrchestratorConfig) GetOrchestratorAgentConfig() orchagent.Config {
-	return c.Orchestrator.Agent
+	return c.OrchAgent
 }
 
 // GetOrchestratorPostgresConfig возвращает конфигурацию Postgres для сервиса оркестрации.
 func (c *OrchestratorConfig) GetOrchestratorPostgresConfig() orchpg.Config {
-	return c.Orchestrator.Db.Postgres
+	return c.OrchDbPostgres
 }
 
 // GetOrchestratorPgxConfig возвращает конфигурацию pgx для сервиса оркестрации.
 func (c *OrchestratorConfig) GetOrchestratorPgxConfig() orchpgx.Config {
-	return c.Orchestrator.Db.Pgx
-}
-
-// GetOrchestratorDBConfig возвращает конфигурацию базы данных для сервиса оркестрации.
-func (c *OrchestratorConfig) GetOrchestratorDBConfig() orchdb.Config {
-	return c.Orchestrator.Db
+	return c.OrchDbPgx
 }
 
 // GetShutdownConfig возвращает конфигурацию graceful shutdown.
 func (c *OrchestratorConfig) GetShutdownConfig() shutdown.Config {
-	return c.getShutdownConfig()
+	return c.GracefulShutdown
 }
 
 // GetOrchestratorGRPCAddress возвращает адрес gRPC сервера оркестрации.
 func (c *OrchestratorConfig) GetOrchestratorGRPCAddress() string {
-	return fmt.Sprintf("%s:%d", c.Orchestrator.Grpc.Host, c.Orchestrator.Grpc.Port)
+	return fmt.Sprintf("%s:%d", c.OrchGrpc.Host, c.OrchGrpc.Port)
 }
 
 // GetConnectionURL возвращает URL-строку подключения для миграций.
 func (c *OrchestratorConfig) GetConnectionURL() string {
-	pg := c.Orchestrator.Db.Postgres
+	pg := c.OrchDbPostgres
 	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		pg.User, pg.Password, pg.Host, pg.Port, pg.Database)
 }
 
 // GetDSN возвращает DSN-строку подключения для Postgres.
 func (c *OrchestratorConfig) GetDSN() string {
-	pg := c.Orchestrator.Db.Postgres
+	pg := c.OrchDbPostgres
 	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		pg.Host, pg.Port, pg.User, pg.Password, pg.Database)
 }
 
 // GetAccessTokenTTL возвращает длительность жизни JWT access token.
 func (c *OrchestratorConfig) GetAccessTokenTTL() time.Duration {
-	return c.getAccessTokenTTL()
+	return c.JWT.AccessTokenTTL
 }
 
 // GetRefreshTokenTTL возвращает длительность жизни JWT refresh token.
 func (c *OrchestratorConfig) GetRefreshTokenTTL() time.Duration {
-	return c.getRefreshTokenTTL()
+	return c.JWT.RefreshTokenTTL
 }
 
 // GetShutdownTimeout возвращает timeout для graceful shutdown.
 func (c *OrchestratorConfig) GetShutdownTimeout() time.Duration {
-	return c.getShutdownTimeout()
+	return c.GracefulShutdown.ShutdownTimeout
 }
 
 // GetAgentComputerPower возвращает количество агентов для вычислений.
 func (c *OrchestratorConfig) GetAgentComputerPower() int {
-	return c.Orchestrator.Agent.ComputerPower
+	return c.OrchAgent.ComputerPower
 }
 
 // GetAgentOperationTimes возвращает времена выполнения операций для агентов.
 func (c *OrchestratorConfig) GetAgentOperationTimes() map[string]time.Duration {
 	return map[string]time.Duration{
-		"addition":       c.Orchestrator.Agent.TimeAddition,
-		"subtraction":    c.Orchestrator.Agent.TimeSubtraction,
-		"multiplication": c.Orchestrator.Agent.TimeMultiplications,
-		"division":       c.Orchestrator.Agent.TimeDivisions,
+		"addition":       c.OrchAgent.TimeAddition,
+		"subtraction":    c.OrchAgent.TimeSubtraction,
+		"multiplication": c.OrchAgent.TimeMultiplications,
+		"division":       c.OrchAgent.TimeDivisions,
 	}
 }
 
-// GetLoggerConfig возвращает конфигурацию журнал.
+// GetLoggerConfig возвращает конфигурацию журнала.
 func (c *ServerConfig) GetLoggerConfig() logger.Config {
-	return c.getLoggerConfig()
+	return c.Logger
 }
 
 // GetServerConfig возвращает конфигурацию HTTP сервера.
@@ -243,7 +247,7 @@ func (c *ServerConfig) GetServerConfig() server.Config {
 
 // GetShutdownConfig возвращает конфигурацию graceful shutdown.
 func (c *ServerConfig) GetShutdownConfig() shutdown.Config {
-	return c.getShutdownConfig()
+	return c.GracefulShutdown
 }
 
 // GetServerAddress возвращает адрес HTTP сервера.
@@ -253,5 +257,73 @@ func (c *ServerConfig) GetServerAddress() string {
 
 // GetShutdownTimeout возвращает timeout для graceful shutdown.
 func (c *ServerConfig) GetShutdownTimeout() time.Duration {
-	return c.getShutdownTimeout()
+	return c.GracefulShutdown.ShutdownTimeout
+}
+
+// GetAuthGRPCConfig возвращает конфигурацию gRPC для сервиса авторизации.
+func (c *ServerConfig) GetAuthGRPCConfig() struct {
+	Host string
+	Port int
+} {
+	return struct {
+		Host string
+		Port int
+	}{
+		Host: c.AuthGrpc.Host,
+		Port: c.AuthGrpc.Port,
+	}
+}
+
+// GetOrchestratorGRPCConfig возвращает конфигурацию gRPC для сервиса оркестрации.
+func (c *ServerConfig) GetOrchestratorGRPCConfig() struct {
+	Host string
+	Port int
+} {
+	return struct {
+		Host string
+		Port int
+	}{
+		Host: c.OrchGrpc.Host,
+		Port: c.OrchGrpc.Port,
+	}
+}
+
+// GetMaxOperations возвращает максимальное количество операций в одном выражении.
+func (c *OrchestratorConfig) GetMaxOperations() int {
+	return c.OrchAgent.MaxOperations
+}
+
+// ToPostgresConfig converts AuthConfig's postgres config to database.PostgresConfig.
+func (c *AuthConfig) ToPostgresConfig() database.PostgresConfig {
+	return database.PostgresConfig{
+		Host:            c.AuthDbPostgres.Host,
+		Port:            c.AuthDbPostgres.Port,
+		User:            c.AuthDbPostgres.User,
+		Password:        c.AuthDbPostgres.Password,
+		Database:        c.AuthDbPostgres.Database,
+		SSLMode:         c.AuthDbPostgres.SSLMode,
+		ApplicationName: c.AuthDbPostgres.ApplicationName,
+		ConnTimeout:     c.AuthDbPostgres.ConnRetryInterval,
+		MinConns:        c.AuthDbPgx.PoolMinConns,
+		MaxConns:        c.AuthDbPgx.PoolMaxConns,
+	}
+}
+
+// ToPostgresConfig converts OrchestratorConfig's postgres config to database.PostgresConfig.
+func (c *OrchestratorConfig) ToPostgresConfig() database.PostgresConfig {
+	return database.PostgresConfig{
+		Host:            c.OrchDbPostgres.Host,
+		Port:            c.OrchDbPostgres.Port,
+		User:            c.OrchDbPostgres.User,
+		Password:        c.OrchDbPostgres.Password,
+		Database:        c.OrchDbPostgres.Database,
+		SSLMode:         c.OrchDbPostgres.SSLMode,
+		ApplicationName: c.OrchDbPostgres.ApplicationName,
+		ConnTimeout:     c.OrchDbPostgres.ConnRetryInterval,
+		MinConns:        c.OrchDbPgx.PoolMinConns,
+		MaxConns:        c.OrchDbPgx.PoolMaxConns,
+		MaxConnLifetime: c.OrchDbPgx.MaxConnLifetime,
+		MaxConnIdleTime: c.OrchDbPgx.MaxConnIdleTime,
+		HealthPeriod:    30 * time.Second,
+	}
 }

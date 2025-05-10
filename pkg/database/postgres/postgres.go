@@ -39,22 +39,24 @@ var (
 )
 
 // Config хранит параметры для подключения к базе данных PostgreSQL.
-type Config struct {
+type PostgresConfig struct {
 	Host            string
 	Port            int
 	User            string
 	Password        string
 	Database        string
 	SSLMode         string
+	ApplicationName string
+	ConnTimeout     time.Duration
 	MinConns        int
 	MaxConns        int
-	ConnTimeout     time.Duration
+	MaxConnLifetime time.Duration
+	MaxConnIdleTime time.Duration
 	HealthPeriod    time.Duration
-	ApplicationName string
 }
 
 // Validate проверяет правильность конфигурации базы данных.
-func (c Config) Validate() error {
+func (c PostgresConfig) Validate() error {
 	if c.Host == "" {
 		return ErrHostRequired
 	}
@@ -75,7 +77,7 @@ func (c Config) Validate() error {
 }
 
 // DSN возвращает строку подключения к базе данных.
-func (c Config) DSN() string {
+func (c PostgresConfig) DSN() string {
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s",
 		c.User, c.Password, c.Host, c.Port, c.Database)
 
@@ -102,11 +104,11 @@ func (c Config) DSN() string {
 // Database представляет соединение с PostgreSQL.
 type Database struct {
 	pool   *pgxpool.Pool
-	config Config
+	config PostgresConfig
 }
 
 // New создает новое соединение с базой данных PostgreSQL.
-func New(ctx context.Context, config Config) (*Database, error) {
+func New(ctx context.Context, config PostgresConfig) (*Database, error) {
 	if err := config.Validate(); err != nil {
 		logger.Error(ctx, nil, errInvalidConfig, zap.Error(err))
 		return nil, fmt.Errorf("%s: %w", errInvalidConfig, err)
@@ -224,7 +226,7 @@ func NewWithDSN(ctx context.Context, dsn string, minConn, maxConn int) (*Databas
 
 	logger.Info(ctx, nil, logConnected)
 
-	config := Config{
+	config := PostgresConfig{
 		MinConns: minConn,
 		MaxConns: maxConn,
 	}
@@ -265,7 +267,7 @@ func (db *Database) Ping(ctx context.Context) error {
 }
 
 // Config возвращает конфигурацию базы данных.
-func (db *Database) Config() Config {
+func (db *Database) Config() PostgresConfig {
 	return db.config
 }
 

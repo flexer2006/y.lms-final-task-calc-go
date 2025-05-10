@@ -1,3 +1,4 @@
+// Package orchestrator содержит интерфейс для работы с вычислениями.
 package orchestrator
 
 import (
@@ -23,4 +24,7 @@ type UseCaseCalculation interface {
 
 	// UpdateCalculationStatus обновляет статус вычисления после обработки операций.
 	UpdateCalculationStatus(ctx context.Context, calculationID uuid.UUID) error
+
+	// Close closes any resources used by this interface implementation
+	Close() error
 }

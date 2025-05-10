@@ -1,5 +1,7 @@
+// Package logger содержит конфигурацию для логгера.
 package logger
 
+// Config содержит конфигурацию для логгера.
 type Config struct {
 	Level        string `env:"LOGGER_LEVEL" env-default:"info"`
 	Format       string `env:"LOGGER_FORMAT" env-default:"json"`

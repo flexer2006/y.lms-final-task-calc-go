@@ -1,7 +1,9 @@
+// Package pgxx содержит конфигурацию для pgx.
 package pgxx
 
 import "time"
 
+// Config содержит конфигурацию для pgx.
 type Config struct {
 	PoolMaxConns    int           `yaml:"pool_max_conns" env:"AUTH_PGX_POOL_MAX_CONNS" env-default:"10"`
 	PoolMinConns    int           `yaml:"pool_min_conns" env:"AUTH_PGX_POOL_MIN_CONNS" env-default:"1"`

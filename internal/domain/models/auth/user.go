@@ -1,3 +1,4 @@
+// Package auth содержит модели для работы с аутентификацией.
 package auth
 
 import (

@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func createValidConfig() postgres.Config {
-	return postgres.Config{
+func createValidConfig() postgres.PostgresConfig {
+	return postgres.PostgresConfig{
 		Host:            "localhost",
 		Port:            5432,
 		User:            "postgres",
@@ -31,37 +31,37 @@ func createValidConfig() postgres.Config {
 func TestConfigValidate(t *testing.T) {
 	testCases := []struct {
 		name         string
-		modifyConfig func(*postgres.Config)
+		modifyConfig func(*postgres.PostgresConfig)
 		expectedErr  error
 	}{
 		{
 			name:         "Valid config",
-			modifyConfig: func(c *postgres.Config) {},
+			modifyConfig: func(c *postgres.PostgresConfig) {},
 			expectedErr:  nil,
 		},
 		{
 			name:         "Missing host",
-			modifyConfig: func(c *postgres.Config) { c.Host = "" },
+			modifyConfig: func(c *postgres.PostgresConfig) { c.Host = "" },
 			expectedErr:  postgres.ErrHostRequired,
 		},
 		{
 			name:         "Invalid port - too low",
-			modifyConfig: func(c *postgres.Config) { c.Port = 0 },
+			modifyConfig: func(c *postgres.PostgresConfig) { c.Port = 0 },
 			expectedErr:  postgres.ErrInvalidPort,
 		},
 		{
 			name:         "Invalid port - too high",
-			modifyConfig: func(c *postgres.Config) { c.Port = 65536 },
+			modifyConfig: func(c *postgres.PostgresConfig) { c.Port = 65536 },
 			expectedErr:  postgres.ErrInvalidPort,
 		},
 		{
 			name:         "Missing user",
-			modifyConfig: func(c *postgres.Config) { c.User = "" },
+			modifyConfig: func(c *postgres.PostgresConfig) { c.User = "" },
 			expectedErr:  postgres.ErrUserRequired,
 		},
 		{
 			name:         "Missing database",
-			modifyConfig: func(c *postgres.Config) { c.Database = "" },
+			modifyConfig: func(c *postgres.PostgresConfig) { c.Database = "" },
 			expectedErr:  postgres.ErrDatabaseRequired,
 		},
 	}
@@ -84,12 +84,12 @@ func TestConfigValidate(t *testing.T) {
 func TestConfigDSN(t *testing.T) {
 	testCases := []struct {
 		name     string
-		config   postgres.Config
+		config   postgres.PostgresConfig
 		expected string
 	}{
 		{
 			name: "Basic DSN",
-			config: postgres.Config{
+			config: postgres.PostgresConfig{
 				Host:     "localhost",
 				Port:     5432,
 				User:     "postgres",
@@ -100,7 +100,7 @@ func TestConfigDSN(t *testing.T) {
 		},
 		{
 			name: "DSN with SSL mode",
-			config: postgres.Config{
+			config: postgres.PostgresConfig{
 				Host:     "localhost",
 				Port:     5432,
 				User:     "postgres",
@@ -112,7 +112,7 @@ func TestConfigDSN(t *testing.T) {
 		},
 		{
 			name: "DSN with application name",
-			config: postgres.Config{
+			config: postgres.PostgresConfig{
 				Host:            "localhost",
 				Port:            5432,
 				User:            "postgres",
@@ -124,7 +124,7 @@ func TestConfigDSN(t *testing.T) {
 		},
 		{
 			name: "DSN with multiple params",
-			config: postgres.Config{
+			config: postgres.PostgresConfig{
 				Host:            "localhost",
 				Port:            5432,
 				User:            "postgres",
@@ -144,7 +144,7 @@ func TestConfigDSN(t *testing.T) {
 	}
 
 	t.Run("DSN with special characters", func(t *testing.T) {
-		cfg := postgres.Config{
+		cfg := postgres.PostgresConfig{
 			Host:     "localhost",
 			Port:     5432,
 			User:     "post:gres",
@@ -183,7 +183,7 @@ func TestIntegration_Full_Lifecycle(t *testing.T) {
 
 	ctx := setupLoggerContext()
 
-	cfg := postgres.Config{
+	cfg := postgres.PostgresConfig{
 		Host:            "localhost",
 		Port:            5432,
 		User:            "auth",
@@ -245,11 +245,11 @@ func TestNew_ValidationError(t *testing.T) {
 
 	invalidConfigs := []struct {
 		name   string
-		config postgres.Config
+		config postgres.PostgresConfig
 	}{
 		{
 			name: "Empty host",
-			config: postgres.Config{
+			config: postgres.PostgresConfig{
 				Port:     5432,
 				User:     "postgres",
 				Password: "password",
@@ -258,7 +258,7 @@ func TestNew_ValidationError(t *testing.T) {
 		},
 		{
 			name: "Invalid port",
-			config: postgres.Config{
+			config: postgres.PostgresConfig{
 				Host:     "localhost",
 				Port:     0,
 				User:     "postgres",
@@ -268,7 +268,7 @@ func TestNew_ValidationError(t *testing.T) {
 		},
 		{
 			name: "Empty user",
-			config: postgres.Config{
+			config: postgres.PostgresConfig{
 				Host:     "localhost",
 				Port:     5432,
 				Password: "password",
@@ -277,7 +277,7 @@ func TestNew_ValidationError(t *testing.T) {
 		},
 		{
 			name: "Empty database",
-			config: postgres.Config{
+			config: postgres.PostgresConfig{
 				Host:     "localhost",
 				Port:     5432,
 				User:     "postgres",
@@ -303,7 +303,7 @@ func TestNew_ConnectionError(t *testing.T) {
 
 	ctx := setupLoggerContext()
 
-	cfg := postgres.Config{
+	cfg := postgres.PostgresConfig{
 		Host:        "nonexistenthost",
 		Port:        5432,
 		User:        "postgres",
@@ -336,7 +336,7 @@ func TestDatabase_AcquireConn_Integration(t *testing.T) {
 
 	ctx := setupLoggerContext()
 
-	cfg := postgres.Config{
+	cfg := postgres.PostgresConfig{
 		Host:     "localhost",
 		Port:     5432,
 		User:     "auth",

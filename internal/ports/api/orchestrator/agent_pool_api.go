@@ -1,3 +1,4 @@
+// Package orchestrator содержит интерфейс для управления пулом агентов-горутин.
 package orchestrator
 
 import (
@@ -13,7 +14,7 @@ type AgentPool interface {
 	Start(ctx context.Context)
 
 	// Stop останавливает все агенты.
-	Stop()
+	Stop(ctx context.Context) // Updated to include context parameter
 
 	// GetAvailableAgent находит доступного агента для операции.
 	GetAvailableAgent(operationType int) (*agent.Agent, error)

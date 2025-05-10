@@ -313,3 +313,10 @@ func Sync(ctx context.Context, defaultLogger Logger) error {
 	}
 	return nil
 }
+
+func GetZapLogger(logger Logger) *zap.Logger {
+	if zapLogger, ok := logger.(ZapLogger); ok {
+		return zapLogger.RawLogger()
+	}
+	return zap.NewNop()
+}

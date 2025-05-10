@@ -1,3 +1,4 @@
+// Package jwt содержит интерфейс для работы с JWT токенами.
 package jwt
 
 import (

@@ -1,3 +1,4 @@
+// Package auth содержит интерфейс для работы с хранилищем токенов.
 package auth
 
 import (

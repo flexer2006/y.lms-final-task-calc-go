@@ -4,20 +4,33 @@ package main
 import (
 	"context"
 	"fmt"
+	"net"
 	"os"
 	"strings"
 	"time"
 
+	pgorch "github.com/flexer2006/y.lms-final-task-calc-go/internal/adapters/db/postgres/orchestrator"
+	grpcserver "github.com/flexer2006/y.lms-final-task-calc-go/internal/adapters/servers/grpc"
+	grpcorch "github.com/flexer2006/y.lms-final-task-calc-go/internal/adapters/servers/grpc/orchestrator"
+	"github.com/flexer2006/y.lms-final-task-calc-go/internal/adapters/services/parser"
+	"github.com/flexer2006/y.lms-final-task-calc-go/internal/app/orchestrator/calculation"
+	"github.com/flexer2006/y.lms-final-task-calc-go/internal/app/orchestrator/processor"
+
 	"github.com/flexer2006/y.lms-final-task-calc-go/internal/setup"
+	orchv1 "github.com/flexer2006/y.lms-final-task-calc-go/pkg/api/proto/v1/orchestrator"
 	"github.com/flexer2006/y.lms-final-task-calc-go/pkg/config"
 	"github.com/flexer2006/y.lms-final-task-calc-go/pkg/database"
 	"github.com/flexer2006/y.lms-final-task-calc-go/pkg/database/migrate"
 	"github.com/flexer2006/y.lms-final-task-calc-go/pkg/logger"
 	"github.com/flexer2006/y.lms-final-task-calc-go/pkg/shutdown"
 	"go.uber.org/zap"
+
+	memAgent "github.com/flexer2006/y.lms-final-task-calc-go/internal/adapters/db/memory/agent"
+	"github.com/flexer2006/y.lms-final-task-calc-go/internal/app/agent/executor"
+	"github.com/flexer2006/y.lms-final-task-calc-go/internal/app/agent/pool"
+	"github.com/google/uuid"
 )
 
-// Константы для сообщений об ошибках.
 const (
 	ErrInitLogger     = "failed to initialize logger"
 	ErrSyncLogger     = "failed to sync logger"
@@ -28,13 +41,11 @@ const (
 	ErrStartGRPC      = "failed to start gRPC server"
 )
 
-// Константы для игнорируемых ошибок.
 const (
 	ErrSyncStderr = "sync /dev/stderr: invalid argument"
 	ErrSyncStdout = "sync /dev/stdout: invalid argument"
 )
 
-// Константы для сообщений сервиса.
 const (
 	LogServiceStarted      = "orchestrator service started"
 	LogServiceShutdownDone = "orchestrator service shutdown complete"
@@ -46,6 +57,15 @@ const (
 	LogMigrationsCompleted = "database migrations completed"
 	LogClosingDB           = "closing database connections"
 	LogAgentsInfo          = "agent configuration loaded"
+	LogInitGRPCServer      = "initializing gRPC server"
+	LogGRPCListening       = "gRPC server listening"
+	LogGRPCShutdown        = "shutting down gRPC server"
+	LogRegisteringService  = "registering orchestrator gRPC service"
+	LogInitServices        = "initializing services"
+	LogServicesInitialized = "services initialized"
+	LogInitProcessor       = "initializing operation processor"
+	LogProcessorStarted    = "operation processor started"
+	LogProcessorShutdown   = "shutting down operation processor"
 )
 
 func main() {
@@ -124,69 +144,24 @@ func main() {
 	log = logImpl
 	ctx = logger.WithLogger(ctx, log)
 
-	isConfigChanged := false
-
-	if pgConfig.Host == "orchestrator-db" {
-		pgConfig.Host = "localhost"
-		isConfigChanged = true
-		logger.Info(ctx, log, "Setting database host for local development", zap.String("host", pgConfig.Host))
-	} else if pgConfig.Host == "" {
-		pgConfig.Host = "localhost"
-		isConfigChanged = true
-		logger.Info(ctx, log, "Setting default database host", zap.String("host", pgConfig.Host))
-	}
-
-	if pgConfig.Port == 0 {
-		pgConfig.Port = 5433
-		isConfigChanged = true
-		logger.Info(ctx, log, "Setting default database port", zap.Int("port", pgConfig.Port))
-	}
-
-	if pgConfig.User == "" {
-		pgConfig.User = "orchestrator"
-		isConfigChanged = true
-		logger.Info(ctx, log, "Setting default database user", zap.String("user", pgConfig.User))
-	}
-
-	if pgConfig.Password == "" {
-		pgConfig.Password = "orchestrator"
-		isConfigChanged = true
-		logger.Info(ctx, log, "Setting default database password", zap.String("password", "****"))
-	}
-
-	if pgConfig.Database == "" {
-		pgConfig.Database = "orchestrator"
-		isConfigChanged = true
-		logger.Info(ctx, log, "Setting default database name", zap.String("database", pgConfig.Database))
-	}
-
-	if pgConfig.SSLMode == "" {
-		pgConfig.SSLMode = "disable"
-		isConfigChanged = true
-		logger.Info(ctx, log, "Setting default database SSL mode", zap.String("ssl_mode", pgConfig.SSLMode))
-	}
-
-	if isConfigChanged {
-		logger.Info(ctx, log, "Updated database configuration",
-			zap.String("host", pgConfig.Host),
-			zap.Int("port", pgConfig.Port),
-			zap.String("database", pgConfig.Database),
-			zap.String("user", pgConfig.User),
-			zap.String("ssl_mode", pgConfig.SSLMode))
-	}
-
 	logger.Info(ctx, log, LogInitDB)
 
-	dbConfig := database.PostgresConfig{
-		Host:            pgConfig.Host,
-		Port:            pgConfig.Port,
-		User:            pgConfig.User,
-		Password:        pgConfig.Password,
-		Database:        pgConfig.Database,
-		SSLMode:         pgConfig.SSLMode,
-		ApplicationName: pgConfig.ApplicationName,
-		ConnTimeout:     pgConfig.ConnRetryInterval,
-	}
+	// Get base config from environment
+	dbConfig := cfg.ToPostgresConfig()
+
+	// Set parameters that might be missing from environment config
+	dbConfig.MaxConnLifetime = cfg.OrchDbPgx.MaxConnLifetime
+	dbConfig.MaxConnIdleTime = cfg.OrchDbPgx.MaxConnIdleTime
+	dbConfig.ConnTimeout = cfg.OrchDbPgx.ConnectTimeout
+	dbConfig.HealthPeriod = 30 * time.Second
+
+	// Log the connection pool settings
+	logger.Info(ctx, log, "Configuring database connection pool",
+		zap.Int("min_connections", dbConfig.MinConns),
+		zap.Int("max_connections", dbConfig.MaxConns),
+		zap.Duration("conn_timeout", dbConfig.ConnTimeout),
+		zap.Duration("max_lifetime", dbConfig.MaxConnLifetime),
+		zap.Duration("idle_timeout", dbConfig.MaxConnIdleTime))
 
 	db, err := database.NewPostgres(ctx, dbConfig)
 	if err != nil {
@@ -197,21 +172,118 @@ func main() {
 	logger.Info(ctx, log, LogDBInitialized)
 
 	logger.Info(ctx, log, LogRunMigrations)
-	migrator := database.NewMigrator()
+
+	dbHandler := &database.Handler{
+		DB:       db,
+		Migrator: database.NewMigrator(),
+	}
+
 	migrateConfig := migrate.Config{
 		Path: cfg.GetOrchestratorPgxConfig().MigratePath,
 	}
-	if err := migrator.Up(ctx, db.GetDSN(), migrateConfig); err != nil {
+	if err := dbHandler.MigrateUp(ctx, migrateConfig); err != nil {
 		logger.Error(ctx, log, ErrRunMigrations, zap.Error(err))
 		exitCode = 1
 		return
 	}
 	logger.Info(ctx, log, LogMigrationsCompleted)
 
-	// TODO: Добавить инициализацию и запуск сервера оркестрации
+	logger.Info(ctx, log, "Initializing repositories")
+	calculationRepo := pgorch.NewCalculationRepository(dbHandler)
+	operationRepo := pgorch.NewOperationRepository(dbHandler)
+	logger.Info(ctx, log, "Repositories initialized")
+
+	logger.Info(ctx, log, LogInitServices)
+	parserService := parser.NewService(cfg.GetMaxOperations())
+	logger.Info(ctx, log, LogServicesInitialized)
+
+	logger.Info(ctx, log, "Initializing use cases")
+	calculationUseCase := calculation.NewUseCase(calculationRepo, operationRepo, parserService)
+	logger.Info(ctx, log, "Use cases initialized")
+
+	logger.Info(ctx, log, "Initializing agent components")
+
+	agentStorage := memAgent.NewAgentStorage()
+
+	operationTimes := map[string]time.Duration{
+		"addition":       agentConfig.TimeAddition,
+		"subtraction":    agentConfig.TimeSubtraction,
+		"multiplication": agentConfig.TimeMultiplications,
+		"division":       agentConfig.TimeDivisions,
+	}
+
+	agentPool, err := pool.NewAgentPool(agentStorage, operationRepo, operationTimes, agentConfig.ComputerPower)
+	if err != nil {
+		logger.Error(ctx, log, "Failed to create agent pool", zap.Error(err))
+		exitCode = 1
+		return
+	}
+	agentPool.Start(ctx)
+
+	operationExecutor := executor.NewOperationExecutor(agentPool, 3, 500*time.Millisecond)
+
+	logger.Info(ctx, log, "Agent components initialized")
+
+	logger.Info(ctx, log, LogInitProcessor)
+	processorConfig := processor.AgentConfig{
+		AgentID:             uuid.New().String()[:8],
+		ComputerPower:       agentConfig.ComputerPower,
+		TimeAddition:        agentConfig.TimeAddition,
+		TimeSubtraction:     agentConfig.TimeSubtraction,
+		TimeMultiplications: agentConfig.TimeMultiplications,
+		TimeDivisions:       agentConfig.TimeDivisions,
+	}
+
+	operationProcessor := processor.NewProcessor(
+		operationRepo,
+		calculationRepo,
+		calculationUseCase,
+		processorConfig,
+		operationExecutor,
+		agentPool,
+	)
+
+	if err := operationProcessor.Start(ctx); err != nil {
+		logger.Error(ctx, log, "Failed to start operation processor", zap.Error(err))
+		exitCode = 1
+		return
+	}
+	logger.Info(ctx, log, LogProcessorStarted)
+
+	logger.Info(ctx, log, LogInitGRPCServer)
+
+	grpcServer := grpcserver.NewServerOrchestrator()
+
+	orchestratorServer := grpcorch.NewServer(calculationUseCase)
+	logger.Info(ctx, log, LogRegisteringService)
+	orchv1.RegisterOrchestratorServiceServer(grpcServer, orchestratorServer)
+
+	grpcAddress := fmt.Sprintf("%s:%d", grpcConfig.Host, grpcConfig.Port)
+	listener, err := net.Listen("tcp", grpcAddress)
+	if err != nil {
+		logger.Error(ctx, log, ErrInitGRPCServer, zap.Error(err))
+		exitCode = 1
+		return
+	}
+
+	go func() {
+		logger.Info(ctx, log, LogGRPCListening, zap.String("address", grpcAddress))
+		if err := grpcServer.Serve(listener); err != nil {
+			logger.Error(ctx, log, ErrStartGRPC, zap.Error(err))
+		}
+	}()
 
 	shutdown.Wait(ctx, cfg.GetShutdownTimeout(),
 		func(ctx context.Context) error {
+			logger.Info(ctx, log, LogGRPCShutdown)
+			grpcServer.GracefulStop()
+
+			logger.Info(ctx, log, LogProcessorShutdown)
+			operationProcessor.Stop()
+
+			logger.Info(ctx, log, "Shutting down agent pool")
+			agentPool.Stop(ctx) // Pass context here
+
 			logger.Info(ctx, log, LogClosingDB)
 			db.Close(ctx)
 			return nil

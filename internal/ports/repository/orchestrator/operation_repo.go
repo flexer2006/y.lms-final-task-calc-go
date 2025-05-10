@@ -1,3 +1,4 @@
+// Package orchestrator содержит интерфейс для работы с хранилищем операций.
 package orchestrator
 
 import (

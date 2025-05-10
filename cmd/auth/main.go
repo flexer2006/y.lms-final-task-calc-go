@@ -4,11 +4,19 @@ package main
 import (
 	"context"
 	"fmt"
+	"net"
 	"os"
 	"strings"
 	"time"
 
+	pgauth "github.com/flexer2006/y.lms-final-task-calc-go/internal/adapters/db/postgres/auth"
+	grpcserver "github.com/flexer2006/y.lms-final-task-calc-go/internal/adapters/servers/grpc"
+	grpcauth "github.com/flexer2006/y.lms-final-task-calc-go/internal/adapters/servers/grpc/auth"
+	"github.com/flexer2006/y.lms-final-task-calc-go/internal/adapters/services/jwt"
+	"github.com/flexer2006/y.lms-final-task-calc-go/internal/adapters/services/password"
+	"github.com/flexer2006/y.lms-final-task-calc-go/internal/app/auth/usecase"
 	"github.com/flexer2006/y.lms-final-task-calc-go/internal/setup"
+	authv1 "github.com/flexer2006/y.lms-final-task-calc-go/pkg/api/proto/v1/auth"
 	"github.com/flexer2006/y.lms-final-task-calc-go/pkg/config"
 	"github.com/flexer2006/y.lms-final-task-calc-go/pkg/database"
 	"github.com/flexer2006/y.lms-final-task-calc-go/pkg/database/migrate"
@@ -17,7 +25,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// Константы для сообщений об ошибках.
 const (
 	ErrInitLogger     = "failed to initialize logger"
 	ErrSyncLogger     = "failed to sync logger"
@@ -28,13 +35,11 @@ const (
 	ErrStartGRPC      = "failed to start gRPC server"
 )
 
-// Константы для игнорируемых ошибок.
 const (
 	ErrSyncStderr = "sync /dev/stderr: invalid argument"
 	ErrSyncStdout = "sync /dev/stdout: invalid argument"
 )
 
-// Константы для сообщений сервиса.
 const (
 	LogServiceStarted      = "authentication service started"
 	LogServiceShutdownDone = "authentication service shutdown complete"
@@ -45,6 +50,12 @@ const (
 	LogRunMigrations       = "running database migrations"
 	LogMigrationsCompleted = "database migrations completed"
 	LogClosingDB           = "closing database connections"
+	LogInitGRPCServer      = "initializing gRPC server"
+	LogGRPCListening       = "gRPC server listening"
+	LogGRPCShutdown        = "shutting down gRPC server"
+	LogRegisteringService  = "registering auth gRPC service"
+	LogInitServices        = "initializing services"
+	LogServicesInitialized = "services initialized"
 )
 
 func main() {
@@ -110,55 +121,11 @@ func main() {
 	log = logImpl
 	ctx = logger.WithLogger(ctx, log)
 
-	isConfigChanged := false
-
-	if pgConfig.Host == "" {
-		pgConfig.Host = "localhost"
-		isConfigChanged = true
-		logger.Info(ctx, log, "Setting database host for local development", zap.String("host", pgConfig.Host))
-	}
-
-	if pgConfig.Port == 0 {
-		pgConfig.Port = 5432
-		isConfigChanged = true
-		logger.Info(ctx, log, "Setting default database port", zap.Int("port", pgConfig.Port))
-	}
-
-	if pgConfig.User == "" {
-		pgConfig.User = "auth"
-		isConfigChanged = true
-		logger.Info(ctx, log, "Setting default database user", zap.String("user", pgConfig.User))
-	}
-
-	if pgConfig.Password == "" {
-		pgConfig.Password = "auth"
-		isConfigChanged = true
-		logger.Info(ctx, log, "Setting default database password", zap.String("password", "****"))
-	}
-
-	if pgConfig.Database == "" {
-		pgConfig.Database = "auth"
-		isConfigChanged = true
-		logger.Info(ctx, log, "Setting default database name", zap.String("database", pgConfig.Database))
-	}
-
-	if pgConfig.SSLMode == "" {
-		pgConfig.SSLMode = "disable"
-		isConfigChanged = true
-		logger.Info(ctx, log, "Setting default database SSL mode", zap.String("ssl_mode", pgConfig.SSLMode))
-	}
-
-	if isConfigChanged {
-		logger.Info(ctx, log, "Updated database configuration",
-			zap.String("host", pgConfig.Host),
-			zap.Int("port", pgConfig.Port),
-			zap.String("database", pgConfig.Database),
-			zap.String("user", pgConfig.User),
-			zap.String("ssl_mode", pgConfig.SSLMode))
-	}
-
 	logger.Info(ctx, log, LogInitDB)
-	db, err := database.NewPostgres(ctx, pgConfig)
+
+	dbConfig := cfg.ToPostgresConfig()
+
+	db, err := database.NewPostgres(ctx, dbConfig)
 	if err != nil {
 		logger.Error(ctx, log, ErrInitDB, zap.Error(err))
 		exitCode = 1
@@ -166,22 +133,72 @@ func main() {
 	}
 	logger.Info(ctx, log, LogDBInitialized)
 
+	dbHandler := &database.Handler{
+		DB:       db,
+		Migrator: database.NewMigrator(),
+	}
+
 	logger.Info(ctx, log, LogRunMigrations)
-	migrator := database.NewMigrator()
 	migrateConfig := migrate.Config{
 		Path: cfg.GetAuthPgxConfig().MigratePath,
 	}
-	if err := migrator.Up(ctx, db.GetDSN(), migrateConfig); err != nil {
+	if err := dbHandler.MigrateUp(ctx, migrateConfig); err != nil {
 		logger.Error(ctx, log, ErrRunMigrations, zap.Error(err))
 		exitCode = 1
 		return
 	}
 	logger.Info(ctx, log, LogMigrationsCompleted)
 
+	logger.Info(ctx, log, "Initializing repositories")
+	userRepo := pgauth.NewUserRepository(dbHandler)
+	tokenRepo := pgauth.NewTokenRepository(dbHandler)
+	logger.Info(ctx, log, "Repositories initialized")
+
+	logger.Info(ctx, log, LogInitServices)
+	jwtConfig := cfg.GetJWTConfig()
+	passwordService := password.NewService(jwtConfig.BCryptCost)
+	jwtService := jwt.NewService(
+		jwtConfig.SecretKey,
+		jwtConfig.AccessTokenTTL,
+		jwtConfig.RefreshTokenTTL,
+	)
+	logger.Info(ctx, log, LogServicesInitialized)
+
+	logger.Info(ctx, log, "Initializing use cases")
+	authUseCase := usecase.NewAuthUseCase(userRepo, tokenRepo, passwordService, jwtService)
+	logger.Info(ctx, log, "Use cases initialized")
+
+	logger.Info(ctx, log, LogInitGRPCServer)
+	grpcConfig := cfg.GetAuthGRPCConfig()
+
+	grpcServer := grpcserver.NewServerAuth()
+
+	authServer := grpcauth.NewServer(authUseCase)
+	logger.Info(ctx, log, LogRegisteringService)
+	authv1.RegisterAuthServiceServer(grpcServer, authServer)
+
+	grpcAddress := fmt.Sprintf("%s:%d", grpcConfig.Host, grpcConfig.Port)
+	listener, err := net.Listen("tcp", grpcAddress)
+	if err != nil {
+		logger.Error(ctx, log, ErrInitGRPCServer, zap.Error(err))
+		exitCode = 1
+		return
+	}
+
+	go func() {
+		logger.Info(ctx, log, LogGRPCListening, zap.String("address", grpcAddress))
+		if err := grpcServer.Serve(listener); err != nil {
+			logger.Error(ctx, log, ErrStartGRPC, zap.Error(err))
+		}
+	}()
+
 	shutdown.Wait(ctx, cfg.GetShutdownTimeout(),
 		func(ctx context.Context) error {
+			logger.Info(ctx, log, LogGRPCShutdown)
+			grpcServer.GracefulStop()
+
 			logger.Info(ctx, log, LogClosingDB)
-			db.Close(ctx)
+			dbHandler.Close(ctx)
 			return nil
 		},
 	)

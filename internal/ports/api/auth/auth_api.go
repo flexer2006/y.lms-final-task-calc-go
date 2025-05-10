@@ -1,3 +1,4 @@
+// Package auth содержит интерфейс для работы с аутентификацией.
 package auth
 
 import (
@@ -23,4 +24,7 @@ type UseCaseUser interface {
 
 	// Logout завершает сессию пользователя, аннулируя токен.
 	Logout(ctx context.Context, token string) error
+
+	// Close closes any resources used by this interface implementation
+	Close() error
 }

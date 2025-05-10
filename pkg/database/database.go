@@ -14,7 +14,7 @@ import (
 // Реэкспорт типов из подпакетов для удобства использования.
 type (
 	// PostgresConfig содержит конфигурацию для подключения к PostgreSQL.
-	PostgresConfig = postgres.Config
+	PostgresConfig = postgres.PostgresConfig
 	// MigrateConfig содержит конфигурацию для миграций базы данных.
 	MigrateConfig = migrate.Config
 	// Database представляет соединение с базой данных PostgreSQL.

@@ -8,4 +8,5 @@ type Config struct {
 	TimeSubtraction     time.Duration `env:"TIME_SUBTRACTION" env-default:"1s"`
 	TimeMultiplications time.Duration `env:"TIME_MULTIPLICATIONS" env-default:"2s"`
 	TimeDivisions       time.Duration `env:"TIME_DIVISIONS" env-default:"2s"`
+	MaxOperations       int           `env:"MAX_OPERATIONS" env-default:"100"`
 }

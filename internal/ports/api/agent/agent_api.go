@@ -1,3 +1,4 @@
+// Package agent содержит интерфейс для работы с агентами.
 package agent
 
 import (

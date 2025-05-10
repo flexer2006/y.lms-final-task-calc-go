@@ -1,3 +1,4 @@
+// Package orchestrator содержит модели для работы с вычислениями.
 package orchestrator
 
 import (

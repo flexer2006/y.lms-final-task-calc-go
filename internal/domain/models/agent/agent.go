@@ -1,3 +1,4 @@
+// Package agent содержит модели для работы с агентами.
 package agent
 
 import (

@@ -1,3 +1,4 @@
+// Package password содержит интерфейс для работы с паролями.
 package password
 
 import (

@@ -1,7 +1,9 @@
+// Package postgres содержит конфигурацию для PostgreSQL.
 package postgres
 
 import "time"
 
+// Config содержит конфигурацию для PostgreSQL.
 type Config struct {
 	Host              string        `yaml:"host" env:"AUTH_POSTGRES_DB_HOST" env-default:"auth-db"`
 	Port              int           `yaml:"port" env:"AUTH_POSTGRES_DB_PORT" env-default:"5432"`
