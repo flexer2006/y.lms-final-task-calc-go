@@ -28,19 +28,16 @@ func RegisterRoutes(r chi.Router, authUseCase authAPI.UseCaseUser) {
 	handler := authHandlers.NewHandler(authUseCase)
 
 	r.Route(apiPrefix, func(r chi.Router) {
-		// Common middleware stack
 		r.Use(chiMiddleware.RequestID)
 		r.Use(midleware.Logger)
 		r.Use(midleware.Recovery)
 		r.Use(midleware.ErrorHandler)
 
-		// Public routes
 		r.Post(pathRegister, handler.Register)
 		r.Post(pathLogin, handler.Login)
 		r.Post(pathRefresh, handler.RefreshToken)
 		r.Get(pathHealth, healthCheckHandler)
 
-		// Protected routes
 		r.Group(func(r chi.Router) {
 			r.Use(midleware.AuthMiddleware(authUseCase))
 			r.Post(pathLogout, handler.Logout)
